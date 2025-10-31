@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { navItems } from "../lib/data";
 import { useNavigationStore } from "../lib/stores";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const SideBar = () => {
 	const {
@@ -19,12 +19,13 @@ const SideBar = () => {
 	const lastScrollY = useRef(0);
 	const accumulatedDistance = useRef(0); // 累積滾動距離
 
-	useEffect(() => {
+  useEffect(() => {
+    //往下滑headerbar上縮，往上滑headerbar下拉
 		const handleScroll = () => {
 			const currentScrollY = window.scrollY;
 			const scrollDistance = Math.abs(currentScrollY - lastScrollY.current); // 取絕對值
 			accumulatedDistance.current += scrollDistance;
-			if (accumulatedDistance.current > 10) {
+			if (accumulatedDistance.current > 10 && currentScrollY > lastScrollY.current) {
 				translateHeader(true);
 				accumulatedDistance.current = 0;
 			} else if (currentScrollY < lastScrollY.current) {
