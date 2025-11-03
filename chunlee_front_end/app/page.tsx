@@ -1,9 +1,11 @@
-import { Slides } from "@/components/home";
+import { Slides, Products, Intro } from "@/components/home";
 
 export default function Home() {
 	return (
-		<div className='flex min-h-screen  items-start justify-center'>
+		<div className='flex flex-col min-h-screen  items-start justify-center'>
 			<Slides />
+			<Products />
+			<Intro />
 		</div>
 	);
 }
