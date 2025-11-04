@@ -199,7 +199,7 @@ export default function ConsultantDetailPage() {
 					<p className='text-lg text-gray-600 mb-8'>找不到此顧問師資料</p>
 					<Link
 						href='/consultants'
-						className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200'>
+						className='px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200'>
 						返回顧問師列表
 					</Link>
 				</div>
@@ -226,7 +226,7 @@ export default function ConsultantDetailPage() {
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12'>
 					{/* 左側 - 顧問師基本資訊 */}
 					<div className='lg:col-span-1'>
-						<div className='bg-white rounded-xl shadow-lg overflow-hidden sticky top-8'>
+						<div className='bg-white rounded-md shadow-sm overflow-hidden sticky top-8'>
 							{/* 照片 */}
 							<div className='aspect-square bg-gradient-to-br from-gray-50 to-gray-100'>
 								<img
@@ -291,7 +291,7 @@ export default function ConsultantDetailPage() {
 					{/* 右側 - 詳細資訊 */}
 					<div className='lg:col-span-2 space-y-8'>
 						{/* 個人簡介 */}
-						<div className='bg-white rounded-xl shadow-lg p-6 md:p-8'>
+						<div className='bg-white rounded-md shadow-sm p-6 md:p-8'>
 							<h2 className='text-xl font-bold text-gray-900 mb-4 flex items-center'>
 								<IoPerson className='h-6 w-6 mr-3 text-blue-600' />
 								個人簡介
@@ -302,7 +302,7 @@ export default function ConsultantDetailPage() {
 						</div>
 
 						{/* 專業經歷 */}
-						<div className='bg-white rounded-xl shadow-lg p-6 md:p-8'>
+						<div className='bg-white rounded-md shadow-sm p-6 md:p-8'>
 							<h2 className='text-xl font-bold text-gray-900 mb-6 flex items-center'>
 								<IoBriefcase className='h-6 w-6 mr-3 text-blue-600' />
 								專業經歷
@@ -320,7 +320,7 @@ export default function ConsultantDetailPage() {
 						</div>
 
 						{/* 主要成就 */}
-						<div className='bg-white rounded-xl shadow-lg p-6 md:p-8'>
+						<div className='bg-white rounded-md shadow-sm p-6 md:p-8'>
 							<h2 className='text-xl font-bold text-gray-900 mb-6 flex items-center'>
 								<IoCheckmarkCircle className='h-6 w-6 mr-3 text-blue-600' />
 								主要成就
@@ -338,7 +338,7 @@ export default function ConsultantDetailPage() {
 						</div>
 
 						{/* 學歷背景 */}
-						<div className='bg-white rounded-xl shadow-lg p-6 md:p-8'>
+						<div className='bg-white rounded-md shadow-sm p-6 md:p-8'>
 							<h2 className='text-xl font-bold text-gray-900 mb-6 flex items-center'>
 								<IoSchool className='h-6 w-6 mr-3 text-blue-600' />
 								學歷背景
@@ -354,17 +354,17 @@ export default function ConsultantDetailPage() {
 						</div>
 
 						{/* 聯絡行動按鈕 */}
-						<div className='bg-white rounded-xl shadow-lg p-6 md:p-8'>
+						<div className='bg-white rounded-md shadow-sm p-6 md:p-8'>
 							<h2 className='text-xl font-bold text-gray-900 mb-6'>聯絡顧問</h2>
 							<div className='flex flex-col sm:flex-row gap-4'>
 								<a
 									href={`mailto:${consultant.email}`}
-									className='flex-1 px-6 py-3 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium'>
+									className='flex-1 px-6 py-3 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium'>
 									發送郵件
 								</a>
 								<a
 									href={`tel:${consultant.phone}`}
-									className='flex-1 px-6 py-3 bg-green-600 text-white text-center rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium'>
+									className='flex-1 px-6 py-3 bg-green-600 text-white text-center rounded-md hover:bg-green-700 transition-colors duration-200 font-medium'>
 									直接通話
 								</a>
 							</div>

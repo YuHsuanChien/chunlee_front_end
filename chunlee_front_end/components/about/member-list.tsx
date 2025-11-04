@@ -89,7 +89,7 @@ export const MemberList = () => {
 					<a
 						key={index}
 						href={`/consultants/${member.id}`}
-						className='group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-gray-200 hover:border-gray-300 overflow-hidden relative'>
+						className='group bg-white rounded-md shadow-sm hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 border border-gray-200 hover:border-gray-300 overflow-hidden relative'>
 						{/* 照片區域 */}
 						<div className='relative h-48 md:h-56 lg:h-64 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100'>
 							<img
