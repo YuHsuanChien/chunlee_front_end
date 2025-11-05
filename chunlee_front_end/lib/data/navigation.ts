@@ -25,5 +25,4 @@ export const navItems: NavItem[] = [
 	},
 	{ label: "最新消息", href: "/latest-news" },
 	{ label: "聯絡我們", href: "/contact-us" },
-	{ label: "問答專區", href: "/qa" },
 ];
