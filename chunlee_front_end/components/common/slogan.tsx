@@ -13,9 +13,7 @@ export const Slogan = ({ title, description }: PageSloganProps) => {
 	after:content-[""] after:w-16 after:h-1 after:bg-[#10243d]'>
 					{title}
 				</h2>
-				<p className='text-base md:text-lg'>
-					{description}
-				</p>
+				{description && <p className='text-base md:text-lg'>{description}</p>}
 			</div>
 		</section>
 	);

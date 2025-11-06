@@ -47,17 +47,16 @@ export const Banner = ({
 			</div>
 
 			{/* 桌面版斜切圖片 */}
-			<div
-				className='hidden lg:block absolute right-0 top-0 w-1/2 h-full overflow-hidden'
-				style={{
-					clipPath: "polygon(100px 0%, 100% 0%, 100% 100%, 0% 100%)",
-				}}>
+			<div className='hidden lg:block absolute right-0 top-3 w-1/2 h-full drop-shadow-xl/50'>
 				<Image
 					src={imageSrc}
 					alt={imageAlt}
 					fill
 					className='object-cover'
 					quality={90}
+					style={{
+						clipPath: "polygon(100px 0%, 100% 0%, 100% 100%, 0% 100%)",
+					}}
 				/>
 			</div>
 		</section>

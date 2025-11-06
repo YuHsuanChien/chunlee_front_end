@@ -23,6 +23,5 @@ export const navItems: NavItem[] = [
 			{ label: "公開課程", href: "/training-program/exterior" },
 		],
 	},
-	{ label: "最新消息", href: "/latest-news" },
 	{ label: "聯絡我們", href: "/contact-us" },
 ];
