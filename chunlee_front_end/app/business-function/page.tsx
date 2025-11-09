@@ -1,4 +1,4 @@
-import { Banner, Slogan } from "@/components/common";
+import { Banner, Slogan, More } from "@/components/common";
 import { Content, ServerList } from "@/components/bussiness-function";
 import { businessFunctions } from "@/lib/data";
 
@@ -27,6 +27,11 @@ export default function BussinessFunction() {
 			<Content />
 			<Slogan title='輔導項目' description='' />
 			<ServerList data={businessFunctions} />
+			<More
+				title='下一步'
+				description='立刻與我們聯絡，幫助你的企業進行診斷與規劃下一步策略。'
+				link='/contact-us'
+			/>
 		</section>
 	);
 }

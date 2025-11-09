@@ -40,10 +40,6 @@ const SideBar = () => {
 		};
 	}, []);
 
-	useEffect(() => {
-		console.log(isTranslatedHeader);
-	}, [isTranslatedHeader]);
-
 	return (
 		<>
 			{/* Mobile Header with Hamburger */}
