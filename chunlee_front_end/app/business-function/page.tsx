@@ -1,5 +1,7 @@
 import { Banner, Slogan } from "@/components/common";
-import { Content, Cards } from "@/components/bussiness-function";
+import { Content, ServerList } from "@/components/bussiness-function";
+import { businessFunctions } from "@/lib/data";
+
 export default function BussinessFunction() {
 	return (
 		<section>
@@ -23,8 +25,8 @@ export default function BussinessFunction() {
 				</div>
 			</div>
 			<Content />
-      <Slogan title='讓我們攜手合作，共創美好未來' description='' />
-      <Cards />
+			<Slogan title='輔導項目' description='' />
+			<ServerList data={businessFunctions} />
 		</section>
 	);
 }

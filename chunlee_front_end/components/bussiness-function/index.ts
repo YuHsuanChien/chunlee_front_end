@@ -1,2 +1,2 @@
 export { Content } from "./content";
-export { Cards } from './cards';
+export { ServerList } from "./server-list";

@@ -56,7 +56,7 @@ const ContentItem = ({
 
 export const Content = () => {
 	return (
-		<div className='mx-auto w-full'>
+		<section className='mx-auto w-full'>
 			<div className='max-w-7xl mx-auto px-6 md:px-12 text-base md:text-lg flex flex-col justify-center items-center gap-8 md:gap-10'>
 				{/* 第一個區塊 - 左文右圖 */}
 				<ContentItem
@@ -69,6 +69,6 @@ export const Content = () => {
 					reverse={false}
 				/>
 			</div>
-		</div>
+		</section>
 	);
 };

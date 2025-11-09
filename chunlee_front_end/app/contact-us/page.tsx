@@ -1,5 +1,6 @@
 import { ContactForm } from "@/components/contact-us";
 import { Slogan, Banner } from "@/components/common";
+
 export default function ContactUsPage() {
 	return (
 		<section>

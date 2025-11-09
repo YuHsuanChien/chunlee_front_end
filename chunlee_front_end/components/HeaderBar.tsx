@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { navItems } from "../lib/data";
-import { useEffect } from "react";
 
 const HeaderBar = () => {
 

@@ -10,10 +10,6 @@ export const navItems: NavItem[] = [
 	{
 		label: "企業輔導",
 		href: "/business-function",
-		submenu: [
-			{ label: "經營診斷", href: "/business-function/business-consulting" },
-			{ label: "顧問輔導", href: "/business-function/consulting" },
-		],
 	},
 	{
 		label: "教育訓練",
