@@ -1,0 +1,57 @@
+[
+	{
+		"id": 1,
+		"typeId": "TC-R",
+		"typeName": "台中班(零售業)"
+	},
+	{
+		"id": 2,
+		"typeId": "TY",
+		"typeName": "桃園班"
+	},
+	{
+		"id": 3,
+		"typeId": "TC-M",
+		"typeName": "台中班(工)"
+	},
+	{
+		"id": 4,
+		"typeId": "TC-S",
+		"typeName": "台中班(服務業)"
+	},
+	{
+		"id": 5,
+		"typeId": "TN",
+		"typeName": "台南班"
+	},
+	{
+		"id": 6,
+		"typeId": "KH",
+		"typeName": "高雄班"
+	},
+	{
+		"id": 7,
+		"typeId": "CY",
+		"typeName": "嘉義班"
+	},
+	{
+		"id": 8,
+		"typeId": "OD",
+		"typeName": "隨選隨上班"
+	},
+	{
+		"id": 9,
+		"typeId": "CTC",
+		"typeName": "顧問師培訓班"
+	},
+	{
+		"id": 10,
+		"typeId": "CH",
+		"typeName": "彰化班"
+	},
+	{
+		"id": 11,
+		"typeId": "CERT",
+		"typeName": "資格認證班"
+	}
+]

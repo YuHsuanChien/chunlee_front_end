@@ -1,15 +1,10 @@
 import { Banner, Slogan } from "@/components/common";
 import { InteriorList } from "@/components/training-program";
-
-async function fetchData() {
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-	const res = await fetch(`${baseUrl}/json/interior.json`);
-	const data = await res.json();
-	return data;
-}
+import { fetchJsonData } from "@/lib/hooks";
+import { InteriorData } from "@/lib/interfaces";
 
 export default async function Interior() {
-	const data = await fetchData();
+	const data = await fetchJsonData<InteriorData[]>("interior.json");
 	console.log("data", data);
 
 	return (

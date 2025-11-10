@@ -1,22 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { IoChevronDown, IoClose } from "react-icons/io5";
-
-interface Course {
-	id: number;
-	title: string;
-	content: string[];
-}
-
-interface InteriorData {
-	courseId: string;
-	courseName: string;
-	courseList: Course[];
-}
-
-interface InteriorListProps {
-	data: InteriorData[];
-}
+import { InteriorData, InteriorListProps, Course } from "@/lib/interfaces";
 
 export const InteriorList = ({ data }: InteriorListProps) => {
 	const [selectItem, setSelectItem] = useState<InteriorData | null>(null);
@@ -39,7 +24,6 @@ export const InteriorList = ({ data }: InteriorListProps) => {
 	}
 
 	useEffect(() => {
-		console.log("data in InteriorList:", data);
 		setSelectItem(data[0]);
 	}, [data]);
 
@@ -52,7 +36,9 @@ export const InteriorList = ({ data }: InteriorListProps) => {
 					onClick={() => {
 						setIsOpen(!isOpen);
 					}}>
-					<p>次選單</p>
+					<p className='font-medium'>
+						{selectItem ? selectItem.courseName : "次選單"}
+					</p>
 					<IoChevronDown
 						className={`text-2xl transition-all duration-500 ${
 							isOpen ? "rotate-180" : ""

@@ -1,0 +1,1 @@
+export { fetchJsonData } from "./useJsonData";
