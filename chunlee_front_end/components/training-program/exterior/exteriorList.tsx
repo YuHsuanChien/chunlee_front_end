@@ -81,11 +81,11 @@ export const ExteriorList = ({
 	}
 
 	return (
-		<section className='max-w-[1600px] mx-auto px-6 md:px-12 grid md:grid-cols-4 gap-3 md:gap-6 pb-12 md:pb-20 lg:pb-24'>
+		<section className='max-w-[1600px] mx-auto px-6 lg:px-12 grid lg:grid-cols-4 gap-3 lg:gap-6 pb-12 lg:pb-20 lg:pb-24'>
 			{/* 項目 */}
-			<div className='md:col-span-1'>
+			<div className='lg:col-span-1'>
 				<div
-					className='md:hidden flex justify-between items-center p-4 border border-gray-200 rounded-lg mb-1'
+					className='lg:hidden flex justify-between items-center p-4 border border-gray-200 rounded-lg mb-1'
 					onClick={() => {
 						setIsOpen(!isOpen);
 					}}>
@@ -97,15 +97,15 @@ export const ExteriorList = ({
 					/>
 				</div>
 				<ul
-					className={`w-full flex flex-col justify-center items-center shadow-lg rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 md:max-h-none ${
+					className={`w-full flex flex-col justify-center items-center shadow-lg rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 lg:max-h-none ${
 						isOpen
 							? "max-h-[1000px] opacity-100"
-							: "max-h-0 opacity-0 border-0 md:opacity-100 md:border md:max-h-none"
+							: "max-h-0 opacity-0 border-0 lg:opacity-100 lg:border lg:max-h-none"
 					}`}>
 					{/* 全部選項 */}
 					<li
 						key={allCategory.id}
-						className={`w-full border-b border-gray-200 py-3 md:py-6 px-3 cursor-pointer hover:bg-[#2b68b3] hover:text-white text-start ${
+						className={`w-full border-b border-gray-200 py-3 lg:py-6 px-3 cursor-pointer hover:bg-[#2b68b3] hover:text-white text-start ${
 							selectItem.typeName === allCategory.typeName
 								? "bg-[#2b68b3] text-white"
 								: ""
@@ -121,7 +121,7 @@ export const ExteriorList = ({
 						exteriorList.map((item) => (
 							<li
 								key={item.id}
-								className={`w-full border-b last:border-0 border-gray-200 py-3 md:py-6 px-3 cursor-pointer hover:bg-[#2b68b3] hover:text-white text-start ${
+								className={`w-full border-b last:border-0 border-gray-200 py-3 lg:py-6 px-3 cursor-pointer hover:bg-[#2b68b3] hover:text-white text-start ${
 									selectItem?.typeName === item.typeName
 										? "bg-[#2b68b3] text-white"
 										: ""
@@ -136,7 +136,7 @@ export const ExteriorList = ({
 				</ul>
 			</div>
 			{/* 服務清單 */}
-			<div className='md:col-span-3'>
+			<div className='lg:col-span-3'>
 				<div className='px-5 py-4 flex flex-col lg:flex-row justify-between items-center bg-linear-to-r from-[#2b68b3] to-[#4a90e2] rounded-md mb-6 shadow-md gap-3'>
 					<h2 className='text-lg lg:text-2xl font-semibold text-white'>
 						快速搜尋
@@ -163,7 +163,7 @@ export const ExteriorList = ({
 				</div>
 				{/* 課程資料 */}
 				<div className='w-full'>
-					<div className='thead w-full hidden md:flex justify-between items-center border-b-2 border-gray-950 mb-3'>
+					<div className='thead w-full hidden lg:flex justify-between items-center border-b-2 border-gray-950 mb-3'>
 						<div className='relative p-3 w-36 text-center text-base text-gray-500 after:content-["|"] after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:text-gray-300'>
 							開課日期
 						</div>
@@ -187,9 +187,9 @@ export const ExteriorList = ({
 							currentCourses.map((course, index) => (
 								<div
 									key={index}
-									className='flex flex-col md:flex-row justify-between items-start md:items-center w-full text-gray-700 text-base border-b border-gray-300 hover:bg-gray-50 transition-colors p-3 md:p-0 gap-2 md:gap-0'>
+									className='flex flex-col lg:flex-row justify-between items-start lg:items-center w-full text-gray-700 text-base border-b border-gray-300 hover:bg-gray-50 transition-colors p-3 lg:p-0 gap-2 lg:gap-0'>
 									{/* 手機版標題顯示 */}
-									<div className='md:hidden w-full'>
+									<div className='lg:hidden w-full'>
 										<h3 className='font-bold text-lg mb-2'>{course.title}</h3>
 										<div className='grid grid-cols-2 gap-2 text-sm'>
 											<div>
@@ -220,21 +220,21 @@ export const ExteriorList = ({
 									</div>
 
 									{/* 桌面版顯示 */}
-									<div className='hidden md:block relative p-3 w-36 text-center'>
+									<div className='hidden lg:block relative p-3 w-36 text-center'>
 										{course.date}
 									</div>
-									<div className='hidden md:block relative flex-1 p-3 text-start font-medium'>
+									<div className='hidden lg:block relative flex-1 p-3 text-start font-medium'>
 										{course.title}
 									</div>
-									<div className='hidden md:block relative p-3 w-36 text-center'>
+									<div className='hidden lg:block relative p-3 w-36 text-center'>
 										{course.courseHours}
 									</div>
-									<div className='hidden md:block relative p-3 w-36 text-center'>
+									<div className='hidden lg:block relative p-3 w-36 text-center'>
 										{typeof course.fee === "number"
 											? `NT$ ${course.fee.toLocaleString()}`
 											: course.fee}
 									</div>
-									<div className='hidden md:block p-3 w-28 text-center'>
+									<div className='hidden lg:block p-3 w-28 text-center'>
 										<a
 											href={course.filePath}
 											target='_blank'
