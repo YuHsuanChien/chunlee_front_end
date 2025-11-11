@@ -83,7 +83,7 @@ export const MemberList = () => {
 	];
 
 	return (
-		<section className='max-w-7xl mx-auto px-6 md:px-12 flex flex-col justify-center items-center gap-8 md:gap-10 pb-12 md:pb-20 lg:pb-24'>
+		<section className='max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col justify-center items-center gap-8 md:gap-10 pb-12 md:pb-20 lg:pb-24'>
 			<div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 lg:gap-8'>
 				{data.map((member, index) => (
 					<a

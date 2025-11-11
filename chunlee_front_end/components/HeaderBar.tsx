@@ -4,10 +4,9 @@ import Link from "next/link";
 import { navItems } from "../lib/data";
 
 const HeaderBar = () => {
-
 	return (
 		<header className='hidden lg:block lg:fixed z-50 top-0 left-0 w-full shadow-md bg-[#10243d]'>
-			<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+			<div className='max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8'>
 				<div className='flex justify-between items-center h-16'>
 					{/* Logo */}
 					<div className='shrink-0'>

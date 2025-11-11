@@ -31,7 +31,7 @@ export const Intro = () => {
 	]);
 
 	return (
-		<section className='max-w-7xl mx-auto px-6 md:px-12 flex flex-col justify-center items-center gap-8 md:gap-10 pb-12 md:pb-20 lg:pb-24'>
+		<section className='max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col justify-center items-center gap-8 md:gap-10 pb-12 md:pb-20 lg:pb-24'>
 			{data.map((item, index) => (
 				<div
 					key={index}
@@ -51,9 +51,7 @@ export const Intro = () => {
 
 					{/* 文字內容 */}
 					<div className='flex flex-col justify-center w-full md:w-1/2'>
-						<h2 className='text-2xl md:text-3xl font-bold'>
-							{item.title}
-						</h2>
+						<h2 className='text-2xl md:text-3xl font-bold'>{item.title}</h2>
 						<p className='mt-4 text-base md:text-lg text-gray-700 leading-relaxed'>
 							{item.description}
 						</p>

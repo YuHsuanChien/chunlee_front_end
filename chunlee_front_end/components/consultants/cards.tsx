@@ -5,7 +5,7 @@ import { FaUsers, FaChalkboardTeacher } from "react-icons/fa";
 export const Cards = () => {
 	return (
 		<div className='mx-auto w-full pb-12 md:pb-20 lg:pb-24'>
-			<div className='max-w-7xl mx-auto px-6 md:px-12 text-base md:text-lg flex flex-col justify-center items-center gap-8 md:gap-10'>
+			<div className='max-w-[1600px] mx-auto px-6 md:px-12 text-base md:text-lg flex flex-col justify-center items-center gap-8 md:gap-10'>
 				{/* 卡片容器 */}
 				<div className='w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-10'>
 					{/* 內部訓練卡片 */}

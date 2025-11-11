@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export const Intro = () => {
 	return (
-		<div className='max-w-7xl mx-auto w-full pb-12 md:pb-14 lg:pb-18 grid grid-cols-1 md:grid-cols-2 gap-6 px-2 md:px-4'>
+		<div className='max-w-[1600px] mx-auto w-full pb-12 md:pb-14 lg:pb-18 grid grid-cols-1 md:grid-cols-2 gap-6 px-2 md:px-4'>
 			<div className='w-full'>
 				<h2 className='text-2xl md:text-3xl lg:text-4xl font-medium mb-6'>
 					群力顧問公司

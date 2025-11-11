@@ -6,7 +6,7 @@ interface MoreProps {
 
 export const More = ({ title, description, link }: MoreProps) => {
 	return (
-		<section className='max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-10 py-12 md:py-20 lg:py-24 border-t-[1.5px] border-gray-300'>
+		<section className='max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-10 py-12 md:py-20 lg:py-24 border-t-[1.5px] border-gray-300'>
 			<div className='text-center md:text-left'>
 				<h2 className='text-2xl md:text-3xl font-bold mb-4'>{title}</h2>
 				<p className='text-base md:text-lg text-gray-700 leading-relaxed'>

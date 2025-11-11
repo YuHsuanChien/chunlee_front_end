@@ -129,7 +129,7 @@ export const ContactForm = () => {
 	};
 
 	return (
-		<section className='max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20 lg:py-24'>
+		<section className='max-w-[1600px] mx-auto px-6 md:px-12 py-12 md:py-20 lg:py-24'>
 			<div className='grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16'>
 				{/* Contact Form */}
 				<div className='bg-white'>

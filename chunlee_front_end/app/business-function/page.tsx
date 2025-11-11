@@ -14,7 +14,7 @@ export default function BussinessFunction() {
 				bgColor='bg-gray-300'
 			/>
 			<div className='mx-auto w-full py-12 md:py-20 lg:py-24 '>
-				<div className='max-w-7xl mx-auto px-6 md:px-12 text-base md:text-lg flex flex-col justify-center items-center gap-8 md:gap-10 text-start'>
+				<div className='max-w-[1600px] mx-auto px-6 md:px-12 text-base md:text-lg flex flex-col justify-center items-center gap-8 md:gap-10 text-start'>
 					<p className='text-base md:text-lg lg:px-16'>
 						在瞬息萬變的市場中，唯有持續調整與精準決策，才能維持競爭力。
 						群力顧問以豐富的產業經驗與跨領域視野，協助企業從現況診斷到策略落地，

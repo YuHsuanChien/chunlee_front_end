@@ -1,12 +1,13 @@
 import { Banner, Slogan } from "@/components/common";
 import { fetchJsonData } from "@/lib/hooks";
-import { ExteriorListData } from "@/lib/interfaces";
+import { ExteriorListData, ExteriorCourseData } from "@/lib/interfaces";
 import { ExteriorList } from "@/components/training-program";
 
 export default async function Exterior() {
 	const exteriorList = await fetchJsonData<ExteriorListData[]>(
 		"exteriorList.json"
 	);
+	const courseData = await fetchJsonData<ExteriorCourseData[]>("exterior.json");
 
 	return (
 		<section>
@@ -19,7 +20,9 @@ export default async function Exterior() {
 				bgColor='bg-gray-300'
 			/>
 			<Slogan title='公開課程' description='' />
-			{exteriorList && <ExteriorList exteriorList={exteriorList} />}
+			{exteriorList && courseData && (
+				<ExteriorList exteriorList={exteriorList} courseData={courseData} />
+			)}
 		</section>
 	);
 }

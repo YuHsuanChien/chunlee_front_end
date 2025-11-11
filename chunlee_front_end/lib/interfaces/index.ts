@@ -19,6 +19,25 @@ export interface ExteriorListData {
 	typeName: string;
 }
 
+// 公開課程卡片資料
+export interface ExteriorCourseItem {
+	id: number;
+	typeId: string;
+	typeName: string;
+	title: string;
+	date: string;
+	chooseYear: string;
+	courseHours: string;
+	fee: number | string;
+	filePath: string;
+}
+
+export interface ExteriorCourseData {
+	courseId: string;
+	courseName: string;
+	courseList: ExteriorCourseItem[];
+}
+
 export interface InteriorListProps {
 	data: InteriorData[];
 }
@@ -31,4 +50,5 @@ export interface Course {
 
 export interface ExteriorListProps {
 	exteriorList: ExteriorListData[];
+	courseData: ExteriorCourseData[];
 }

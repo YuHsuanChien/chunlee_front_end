@@ -18,7 +18,7 @@ export const ServerList = ({ data }: { data: BusinessFunctionItem[] }) => {
 	}, [data]);
 
 	return (
-		<section className='max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-4 gap-3 md:gap-6 pb-12 md:pb-20 lg:pb-24'>
+		<section className='max-w-[1600px] mx-auto px-6 md:px-12 grid md:grid-cols-4 gap-3 md:gap-6 pb-12 md:pb-20 lg:pb-24'>
 			{/* 項目 */}
 			<div className='md:col-span-1'>
 				<div

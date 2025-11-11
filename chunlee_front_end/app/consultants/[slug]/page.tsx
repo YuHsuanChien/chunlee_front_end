@@ -211,7 +211,7 @@ export default function ConsultantDetailPage() {
 		<div className='min-h-screen bg-gray-50'>
 			{/* 導航列 */}
 			<div className='bg-white shadow-sm border-b'>
-				<div className='max-w-7xl mx-auto px-6 md:px-12 py-4'>
+				<div className='max-w-[1600px] mx-auto px-6 md:px-12 py-4'>
 					<Link
 						href='/consultants'
 						className='inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200'>
@@ -222,7 +222,7 @@ export default function ConsultantDetailPage() {
 			</div>
 
 			{/* 主要內容 */}
-			<div className='max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20'>
+			<div className='max-w-[1600px] mx-auto px-6 md:px-12 py-12 md:py-20'>
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12'>
 					{/* 左側 - 顧問師基本資訊 */}
 					<div className='lg:col-span-1'>

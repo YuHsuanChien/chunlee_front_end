@@ -11,7 +11,7 @@ import Image from "next/image";
 export const Products = () => {
 	return (
 		<section className='mx-auto w-full py-12 md:py-20 lg:py-24 flex flex-col justify-center items-center gap-16 md:gap-20 lg:gap-24'>
-			<div className='max-w-7xl mx-auto px-6 md:px-12 text-base md:text-lg'>
+			<div className='max-w-[1600px] mx-auto px-6 md:px-12 text-base md:text-lg'>
 				<p>
 					在群力，我們不僅陪伴企業走過挑戰，更引領您邁向未來。
 					<br />
@@ -29,7 +29,7 @@ export const Products = () => {
 				商業服務項目
 			</h2>
 			{/* card */}
-			<div className='max-w-7xl flex flex-wrap justify-center gap-8 md:gap-6 lg:gap-8 w-full'>
+			<div className='max-w-[1600px] flex flex-wrap justify-center gap-8 md:gap-6 lg:gap-8 w-full'>
 				{products.map((item, index) => {
 					return (
 						<div
@@ -50,7 +50,7 @@ export const Products = () => {
 				})}
 			</div>
 			<div className='w-full bg-gray-300 flex justify-between items-center'>
-				<div className='relative max-w-7xl mx-auto'>
+				<div className='relative max-w-[1600px] mx-auto'>
 					<div className='flex flex-col justify-center items-start gap-3 lg:gap-6 ml-10'>
 						<h2 className='text-xl md:text-3xl lg:text-5xl font-medium text-[#0b1929]'>
 							投資企業新未來
