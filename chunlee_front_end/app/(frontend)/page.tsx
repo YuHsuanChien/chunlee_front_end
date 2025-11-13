@@ -1,4 +1,4 @@
-import { Slides, Products, Intro } from "@/components/home";
+import { Slides, Products, Intro } from "@/components/frontend/home";
 
 export default function Home() {
 	return (

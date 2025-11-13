@@ -1,5 +1,5 @@
-import { ContactForm } from "@/components/contact-us";
-import { Slogan, Banner } from "@/components/common";
+import { ContactForm } from "@/components/frontend/contact-us";
+import { Slogan, Banner } from "@/components/frontend/common";
 
 export default function ContactUsPage() {
 	return (

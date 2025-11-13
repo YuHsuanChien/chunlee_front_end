@@ -1,5 +1,5 @@
-import { Banner, Slogan, More } from "@/components/common";
-import { Content, ServerList } from "@/components/bussiness-function";
+import { Banner, Slogan, More } from "@/components/frontend/common";
+import { Content, ServerList } from "@/components/frontend/bussiness-function";
 import { businessFunctions } from "@/lib/data";
 
 export default function BussinessFunction() {

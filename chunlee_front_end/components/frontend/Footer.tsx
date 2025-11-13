@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { navItems } from "../lib/data";
+import { navItems } from "../../lib/data";
 
 const Footer = () => {
 	const currentYear = new Date().getFullYear();

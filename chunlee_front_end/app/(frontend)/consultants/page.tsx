@@ -1,5 +1,5 @@
-import { Banner, Slogan, More } from "@/components/common";
-import { MemberList } from "@/components/about";
+import { Banner, Slogan, More } from "@/components/frontend/common";
+import { MemberList } from "@/components/frontend/about";
 
 export default function Consultants() {
 	return (

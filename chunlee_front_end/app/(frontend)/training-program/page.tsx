@@ -1,5 +1,5 @@
-import { Banner, Slogan } from "@/components/common";
-import { Cards } from "@/components/consultants";
+import { Banner, Slogan } from "@/components/frontend/common";
+import { Cards } from "@/components/frontend/consultants";
 export default function TrainingProgram() {
 	return (
 		<section>

@@ -1,5 +1,5 @@
-import { Banner, Slogan } from "@/components/common";
-import { InteriorList } from "@/components/training-program";
+import { Banner, Slogan } from "@/components/frontend/common";
+import { InteriorList } from "@/components/frontend/training-program";
 import { fetchJsonData } from "@/lib/hooks";
 import { InteriorData } from "@/lib/interfaces";
 

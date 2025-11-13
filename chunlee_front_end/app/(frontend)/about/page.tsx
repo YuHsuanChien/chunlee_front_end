@@ -1,5 +1,5 @@
-import { Banner, Slogan, More } from "@/components/common";
-import { Intro } from "@/components/about";
+import { Banner, Slogan, More } from "@/components/frontend/common";
+import { Intro } from "@/components/frontend/about";
 
 export default function About() {
 	return (

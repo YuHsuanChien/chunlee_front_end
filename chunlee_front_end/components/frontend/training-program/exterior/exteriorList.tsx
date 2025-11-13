@@ -6,7 +6,7 @@ import {
 } from "@/lib/interfaces";
 import { IoChevronDown, IoSearch, IoDownload } from "react-icons/io5";
 import { useState, useMemo } from "react";
-import { Pagination } from "@/components/common";
+import { Pagination } from "@/components/frontend/common";
 
 export const ExteriorList = ({
 	exteriorList,
@@ -23,7 +23,7 @@ export const ExteriorList = ({
 	const [isOpen, setIsOpen] = useState(false);
 	const [keyword, setKeyword] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
-	const itemsPerPage = 12; // 每頁顯示 10 筆
+	const itemsPerPage = 12; // 每頁顯示 12 筆
 
 	// 取得所有課程資料
 	const allCourses = useMemo(() => {

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { navItems } from "../lib/data";
-import { useNavigationStore } from "../lib/stores";
+import { navItems } from "../../lib/data";
+import { useNavigationStore } from "../../lib/stores";
 import { useEffect, useRef } from "react";
 
 const SideBar = () => {
