@@ -96,10 +96,11 @@ export async function POST(request: Request) {
       path: '/',
     })
 
-    // 5. 返回用戶資訊（不包含密碼）
+    // 5. 返回用戶資訊和 token（不包含密碼）
     return NextResponse.json({
       success: true,
       message: '登入成功',
+      token, // 返回 token 給前端，用於 API header
       user: {
         id: user.id,
         account: user.account,

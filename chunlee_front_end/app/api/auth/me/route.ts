@@ -30,11 +30,16 @@ function getUserIdFromToken(token: string): string | null {
   return match ? match[1] : null
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // 從 cookie 獲取 token
-    const cookieStore = await cookies()
-    const token = cookieStore.get('auth-token')?.value
+    // 優先從 Authorization header 獲取 token
+    let token = request.headers.get('Authorization')?.replace('Bearer ', '')
+
+    // 如果 header 沒有，則從 cookie 獲取
+    if (!token) {
+      const cookieStore = await cookies()
+      token = cookieStore.get('auth-token')?.value
+    }
 
     if (!token) {
       return NextResponse.json(
@@ -42,6 +47,8 @@ export async function GET() {
         { status: 401 }
       )
     }
+
+    console.log('[API /auth/me] 驗證 token:', token.substring(0, 20) + '...')
 
     // 解析 token 獲取用戶 ID
     const userId = getUserIdFromToken(token)

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { apiGet, apiPost, setToken, clearToken } from '@/lib/api-client'
 
 // 用戶資料類型
 export interface User {
@@ -36,26 +37,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 檢查用戶認證狀態
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me', {
-        credentials: 'include', // 包含 cookie
-      })
+      const data = await apiGet<{ success: boolean; user?: User }>('/api/auth/me')
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.user) {
-          setUser(data.user)
-          console.log('[AuthProvider] 用戶已登入:', data.user.name)
-        } else {
-          setUser(null)
-          console.log('[AuthProvider] 用戶未登入')
-        }
+      if (data.success && data.user) {
+        setUser(data.user)
+        console.log('[AuthProvider] 用戶已登入:', data.user.name)
       } else {
         setUser(null)
-        console.log('[AuthProvider] 認證失敗，狀態碼:', response.status)
+        console.log('[AuthProvider] 用戶未登入')
       }
     } catch (error) {
       console.error('[AuthProvider] 檢查認證失敗:', error)
       setUser(null)
+      clearToken() // 清除無效的 token
     } finally {
       setIsLoading(false)
     }
@@ -73,48 +67,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
     captcha: string,
     captchaId: string
   ) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ account, password, captcha, captchaId }),
-    })
+    const data = await apiPost<{
+      success: boolean
+      message?: string
+      token?: string
+      user?: User
+    }>('/api/auth/login',
+      { account, password, captcha, captchaId },
+      { requireAuth: false } // 登入請求不需要認證
+    )
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || '登入失敗')
+    if (!data.success || !data.user || !data.token) {
+      throw new Error(data.message || '登入失敗')
     }
 
-    const data = await response.json()
+    // 保存 token 到 localStorage
+    setToken(data.token)
+    setUser(data.user)
+    console.log('[AuthProvider] 登入成功:', data.user.name)
+    console.log('[AuthProvider] Token 已保存')
 
-    if (data.success && data.user) {
-      setUser(data.user)
-      console.log('[AuthProvider] 登入成功:', data.user.name)
-
-      // 登入成功後跳轉
-      const searchParams = new URLSearchParams(window.location.search)
-      const from = searchParams.get('from') || '/admin/admin-home'
-      router.push(from)
-    } else {
-      throw new Error('登入失敗')
-    }
+    // 登入成功後跳轉
+    const searchParams = new URLSearchParams(window.location.search)
+    const from = searchParams.get('from') || '/admin/admin-home'
+    router.push(from)
   }
 
   // 登出功能
   const logout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      })
+      await apiPost('/api/auth/logout')
 
-      if (response.ok) {
-        setUser(null)
-        console.log('[AuthProvider] 登出成功')
-        router.push('/admin/login')
-      }
+      // 清除 token 和用戶狀態
+      clearToken()
+      setUser(null)
+      console.log('[AuthProvider] 登出成功，token 已清除')
+
+      router.push('/admin/login')
     } catch (error) {
       console.error('[AuthProvider] 登出失敗:', error)
+      // 即使 API 失敗，也清除本地狀態
+      clearToken()
+      setUser(null)
+      router.push('/admin/login')
     }
   }
 
