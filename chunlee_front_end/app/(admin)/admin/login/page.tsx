@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAuth } from '../../providers/AuthProvider'
-import { apiGet } from '@/lib/api-client'
 
 export default function AdminLoginPage() {
   const { login } = useAuth()
@@ -23,13 +22,10 @@ export default function AdminLoginPage() {
   // 獲取驗證碼
   const fetchCaptcha = async () => {
     try {
-      const data = await apiGet<{
-        success: boolean
-        captchaId: string
-        captchaImage: string
-      }>('/api/auth/captcha', { requireAuth: false }) // 獲取驗證碼不需要認證
-
-      if (data.success) {
+      // 使用原生 fetch（此 API 在攔截器的白名單中，不會添加 token）
+      const response = await fetch('/api/auth/captcha')
+      if (response.ok) {
+        const data = await response.json()
         setCaptchaData({
           id: data.captchaId,
           image: data.captchaImage,

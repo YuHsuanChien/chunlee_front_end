@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { apiGet, apiPost, setToken, clearToken } from '@/lib/api-client'
+import { setupFetchInterceptor, setToken, clearToken } from '@/lib/fetch-interceptor'
 
 // 用戶資料類型
 export interface User {
@@ -37,26 +37,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 檢查用戶認證狀態
   const checkAuth = async () => {
     try {
-      const data = await apiGet<{ success: boolean; user?: User }>('/api/auth/me')
+      // 使用原生 fetch，攔截器會自動添加 Authorization header
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include',
+      })
 
-      if (data.success && data.user) {
-        setUser(data.user)
-        console.log('[AuthProvider] 用戶已登入:', data.user.name)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.user) {
+          setUser(data.user)
+          console.log('[AuthProvider] 用戶已登入:', data.user.name)
+        } else {
+          setUser(null)
+          console.log('[AuthProvider] 用戶未登入')
+        }
       } else {
         setUser(null)
-        console.log('[AuthProvider] 用戶未登入')
+        console.log('[AuthProvider] 認證失敗，狀態碼:', response.status)
       }
     } catch (error) {
       console.error('[AuthProvider] 檢查認證失敗:', error)
       setUser(null)
-      clearToken() // 清除無效的 token
+      clearToken()
     } finally {
       setIsLoading(false)
     }
   }
 
-  // 頁面載入時檢查認證
+  // 頁面載入時初始化攔截器並檢查認證
   useEffect(() => {
+    // 初始化全域 fetch 攔截器
+    setupFetchInterceptor()
+
+    // 檢查認證狀態
     checkAuth()
   }, [])
 
@@ -67,25 +80,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     captcha: string,
     captchaId: string
   ) => {
-    const data = await apiPost<{
-      success: boolean
-      message?: string
-      token?: string
-      user?: User
-    }>('/api/auth/login',
-      { account, password, captcha, captchaId },
-      { requireAuth: false } // 登入請求不需要認證
-    )
+    // 使用原生 fetch
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ account, password, captcha, captchaId }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || '登入失敗')
+    }
+
+    const data = await response.json()
 
     if (!data.success || !data.user || !data.token) {
       throw new Error(data.message || '登入失敗')
     }
 
-    // 保存 token 到 localStorage
+    // 保存 token 到 localStorage（攔截器會自動使用）
     setToken(data.token)
     setUser(data.user)
     console.log('[AuthProvider] 登入成功:', data.user.name)
-    console.log('[AuthProvider] Token 已保存')
+    console.log('[AuthProvider] Token 已保存到 localStorage')
 
     // 登入成功後跳轉
     const searchParams = new URLSearchParams(window.location.search)
@@ -96,7 +114,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 登出功能
   const logout = async () => {
     try {
-      await apiPost('/api/auth/logout')
+      // 使用原生 fetch，攔截器會自動添加 Authorization header
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
 
       // 清除 token 和用戶狀態
       clearToken()
