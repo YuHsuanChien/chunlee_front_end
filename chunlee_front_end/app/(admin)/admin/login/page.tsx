@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
+import { useAuth } from '../../providers/AuthProvider'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
+  const { login } = useAuth()
   const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     account: '',
@@ -62,29 +62,19 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          account: formData.account,
-          password: formData.password,
-          captcha: formData.captcha,
-          captchaId: captchaData?.id,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || '登入失敗')
+      if (!captchaData?.id) {
+        throw new Error('驗證碼尚未載入')
       }
 
-      const data = await response.json()
+      // 使用 AuthProvider 的 login 方法
+      await login(
+        formData.account,
+        formData.password,
+        formData.captcha,
+        captchaData.id
+      )
 
-      // 登入成功，跳轉到後台首頁或原本要訪問的頁面
-      const from = searchParams.get('from') || '/admin/admin-home'
-      router.push(from)
+      // 登入成功，AuthProvider 會自動處理跳轉
     } catch (err) {
       setError(err instanceof Error ? err.message : '登入失敗，請重試')
       // 登入失敗後刷新驗證碼
