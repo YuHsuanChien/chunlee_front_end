@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { setupFetchInterceptor, setToken, clearToken } from '@/lib/fetch-interceptor'
+import axios, { setToken, clearToken } from '@/lib/axios'
 
 // 用戶資料類型
 export interface User {
@@ -37,23 +37,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 檢查用戶認證狀態
   const checkAuth = async () => {
     try {
-      // 使用原生 fetch，攔截器會自動添加 Authorization header
-      const response = await fetch('/api/auth/me', {
-        credentials: 'include',
-      })
+      // 使用 Axios，攔截器會自動添加 Authorization header
+      const response = await axios.get('/api/auth/me')
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.user) {
-          setUser(data.user)
-          console.log('[AuthProvider] 用戶已登入:', data.user.name)
-        } else {
-          setUser(null)
-          console.log('[AuthProvider] 用戶未登入')
-        }
+      if (response.data.success && response.data.user) {
+        setUser(response.data.user)
+        console.log('[AuthProvider] 用戶已登入:', response.data.user.name)
       } else {
         setUser(null)
-        console.log('[AuthProvider] 認證失敗，狀態碼:', response.status)
+        console.log('[AuthProvider] 用戶未登入')
       }
     } catch (error) {
       console.error('[AuthProvider] 檢查認證失敗:', error)
@@ -64,12 +56,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  // 頁面載入時初始化攔截器並檢查認證
+  // 頁面載入時檢查認證
   useEffect(() => {
-    // 初始化全域 fetch 攔截器
-    setupFetchInterceptor()
-
-    // 檢查認證狀態
     checkAuth()
   }, [])
 
@@ -80,26 +68,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     captcha: string,
     captchaId: string
   ) => {
-    // 使用原生 fetch
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ account, password, captcha, captchaId }),
+    // 使用 Axios
+    const response = await axios.post('/api/auth/login', {
+      account,
+      password,
+      captcha,
+      captchaId,
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || '登入失敗')
-    }
-
-    const data = await response.json()
+    const data = response.data
 
     if (!data.success || !data.user || !data.token) {
       throw new Error(data.message || '登入失敗')
     }
 
-    // 保存 token 到 localStorage（攔截器會自動使用）
+    // 保存 token 到 localStorage（Axios 攔截器會自動使用）
     setToken(data.token)
     setUser(data.user)
     console.log('[AuthProvider] 登入成功:', data.user.name)
@@ -114,11 +97,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 登出功能
   const logout = async () => {
     try {
-      // 使用原生 fetch，攔截器會自動添加 Authorization header
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      })
+      // 使用 Axios，攔截器會自動添加 Authorization header
+      await axios.post('/api/auth/logout')
 
       // 清除 token 和用戶狀態
       clearToken()

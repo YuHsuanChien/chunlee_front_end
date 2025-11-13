@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAuth } from '../../providers/AuthProvider'
+import axios from '@/lib/axios'
 
 export default function AdminLoginPage() {
   const { login } = useAuth()
@@ -22,10 +23,11 @@ export default function AdminLoginPage() {
   // 獲取驗證碼
   const fetchCaptcha = async () => {
     try {
-      // 使用原生 fetch（此 API 在攔截器的白名單中，不會添加 token）
-      const response = await fetch('/api/auth/captcha')
-      if (response.ok) {
-        const data = await response.json()
+      // 使用 Axios（驗證碼 API 不需要 token，攔截器會自動處理）
+      const response = await axios.get('/api/auth/captcha')
+      const data = response.data
+
+      if (data.success) {
         setCaptchaData({
           id: data.captchaId,
           image: data.captchaImage,
