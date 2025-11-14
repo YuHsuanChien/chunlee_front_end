@@ -1,27 +1,25 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
-// 生成隨機驗證碼 ID
-function generateCaptchaId(): string {
-  return `captcha_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-}
+// JWT 密鑰（實際應用中應該從環境變數讀取）
+const JWT_SECRET =
+	process.env.JWT_SECRET || "your-secret-captcha-key-change-in-production";
 
 // 生成隨機驗證碼文字（4位數字+字母）
 function generateCaptchaText(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // 排除容易混淆的字符
-  let result = ''
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
+	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 排除容易混淆的字符
+	let result = "";
+	for (let i = 0; i < 4; i++) {
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return result;
 }
 
-// 創建驗證碼圖片（使用 Canvas 或返回假圖片）
+// 生成驗證碼圖片（使用 SVG 格式）
 function generateCaptchaImage(text: string): string {
-  // 這裡先返回一個假的 base64 圖片
-  // 實際使用時，你可以使用 node-canvas 或其他套件生成真實的驗證碼圖片
-
-  // 創建一個簡單的 SVG 驗證碼
-  const svg = `
+	// 創建簡單的 SVG 驗證碼圖片
+	// 實際應用中可使用 node-canvas 套件生成更複雜的圖片
+	const svg = `
     <svg width="120" height="40" xmlns="http://www.w3.org/2000/svg">
       <rect width="120" height="40" fill="#f3f4f6"/>
       <text x="10" y="28" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1f2937">
@@ -33,76 +31,63 @@ function generateCaptchaImage(text: string): string {
       <circle cx="60" cy="30" r="2" fill="#6b7280"/>
       <circle cx="100" cy="20" r="2" fill="#6b7280"/>
     </svg>
-  `
+  `;
 
-  // 將 SVG 轉換為 base64
-  const base64 = Buffer.from(svg).toString('base64')
-  return `data:image/svg+xml;base64,${base64}`
+	// 將 SVG 轉換為 base64
+	const base64 = Buffer.from(svg).toString("base64");
+	return `data:image/svg+xml;base64,${base64}`;
 }
 
-// 簡易的記憶體儲存（實際應用中應該使用 Redis 或資料庫）
-const captchaStore = new Map<string, { text: string; expiresAt: number }>()
-
-// 定期清理過期的驗證碼
-setInterval(() => {
-  const now = Date.now()
-  for (const [id, data] of captchaStore.entries()) {
-    if (data.expiresAt < now) {
-      captchaStore.delete(id)
-    }
-  }
-}, 60000) // 每分鐘清理一次
-
 export async function GET() {
-  try {
-    // 生成驗證碼
-    const captchaId = generateCaptchaId()
-    const captchaText = generateCaptchaText()
-    const captchaImage = generateCaptchaImage(captchaText)
+	try {
+		// 1. 生成隨機驗證碼文字
+		const captchaText = generateCaptchaText();
+		const captchaImage = generateCaptchaImage(captchaText);
 
-    // 儲存驗證碼（5分鐘後過期）
-    captchaStore.set(captchaId, {
-      text: captchaText,
-      expiresAt: Date.now() + 5 * 60 * 1000,
-    })
+		// 2. 使用 JWT 加密驗證碼答案和建立時間
+		const captchaToken = jwt.sign(
+			{
+				captchaText: captchaText,
+				createdAt: Date.now(),
+			},
+			JWT_SECRET,
+			{ expiresIn: "5m" } // 5 分鐘後自動過期
+		);
 
-    return NextResponse.json({
-      success: true,
-      captchaId,
-      captchaImage,
-    })
-  } catch (error) {
-    console.error('生成驗證碼失敗:', error)
-    return NextResponse.json(
-      { success: false, message: '生成驗證碼失敗' },
-      { status: 500 }
-    )
-  }
+		return NextResponse.json({
+			success: true,
+			captchaToken,
+			captchaImage,
+		});
+	} catch (error) {
+		console.error("生成驗證碼失敗:", error);
+		return NextResponse.json(
+			{ success: false, message: "生成驗證碼失敗" },
+			{ status: 500 }
+		);
+	}
 }
 
 // 驗證驗證碼（供登入 API 使用）
-export function verifyCaptcha(captchaId: string, captchaInput: string): boolean {
-  const stored = captchaStore.get(captchaId)
+export function verifyCaptcha(
+	captchaToken: string,
+	captchaInput: string
+): boolean {
+	try {
+		// 驗證並解碼 JWT token
+		const decoded = jwt.verify(captchaToken, JWT_SECRET) as {
+			captchaText: string;
+			createdAt: number;
+		};
 
-  if (!stored) {
-    return false // 驗證碼不存在
-  }
+		// 不區分大小寫比對
+		const isValid =
+			decoded.captchaText.toLowerCase() === captchaInput.toLowerCase();
 
-  if (stored.expiresAt < Date.now()) {
-    captchaStore.delete(captchaId)
-    return false // 驗證碼已過期
-  }
-
-  // 不區分大小寫比對
-  const isValid = stored.text.toLowerCase() === captchaInput.toLowerCase()
-
-  // 驗證後刪除（一次性使用）
-  if (isValid) {
-    captchaStore.delete(captchaId)
-  }
-
-  return isValid
+		return isValid;
+	} catch (error) {
+		// Token 無效或已過期
+		console.error("驗證碼驗證失敗:", error);
+		return false;
+	}
 }
-
-// 匯出 captchaStore 供其他模組使用
-export { captchaStore }

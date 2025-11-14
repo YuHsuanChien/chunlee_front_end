@@ -4,19 +4,316 @@
 
 ## 目錄
 
-1. [內部訓練 API](#1-內部訓練-api)
-2. [聯絡我們 API](#2-聯絡我們-api)
-3. [企業輔導 API](#3-企業輔導-api)
+- [API 規格文檔](#api-規格文檔)
+  - [目錄](#目錄)
+  - [1. 後台管理 API](#1-後台管理-api)
+    - [1.1 獲取驗證碼](#11-獲取驗證碼)
+    - [1.2 登入](#12-登入)
+    - [1.3 驗證當前用戶](#13-驗證當前用戶)
+    - [1.4 登出](#14-登出)
+  - [2. 教育訓練 API](#2-教育訓練-api)
+    - [2.1 獲取內部訓練課程](#21-獲取內部訓練課程)
+    - [2.2 獲取公開課程類別](#22-獲取公開課程類別)
+    - [2.3 獲取公開課程列表](#23-獲取公開課程列表)
+  - [3. 聯絡我們 API](#3-聯絡我們-api)
+    - [3.1 獲取圖片驗證碼](#31-獲取圖片驗證碼)
+    - [2.2 提交聯絡表單](#22-提交聯絡表單)
+  - [3. 企業輔導 API](#3-企業輔導-api)
+    - [3.1 獲取輔導服務列表](#31-獲取輔導服務列表)
+    - [3.2 獲取特定類型服務](#32-獲取特定類型服務)
+  - [通用規範](#通用規範)
+    - [HTTP 狀態碼](#http-狀態碼)
+    - [錯誤響應格式](#錯誤響應格式)
+    - [Headers](#headers)
+  - [TypeScript 類型定義匯總](#typescript-類型定義匯總)
+  - [測試範例](#測試範例)
+    - [1. 測試獲取課程列表](#1-測試獲取課程列表)
+    - [2. 測試獲取圖片驗證碼](#2-測試獲取圖片驗證碼)
+    - [3. 測試提交聯絡表單](#3-測試提交聯絡表單)
+    - [4. 測試獲取企業輔導服務](#4-測試獲取企業輔導服務)
+  - [備註](#備註)
 
 ---
 
-## 1. 內部訓練 API
+## 1. 後台管理 API
 
-### 1.1 獲取課程列表
+### 1.1 獲取驗證碼
 
-**端點**: `GET /api/training/courses`
+**端點**: `GET /api/auth/captcha`
 
-**描述**: 獲取所有內部訓練課程資料
+**描述**: 獲取圖片驗證碼,用於登入時驗證
+
+**請求參數**: 無
+
+**響應格式**:
+
+```json
+{
+	"success": true,
+	"captchaToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+	"captchaImage": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0i..."
+}
+```
+
+**數據結構說明**:
+
+```typescript
+interface CaptchaResponse {
+	success: boolean;
+	captchaToken: string; // JWT 加密的驗證碼 token,提交登入時需要
+	captchaImage: string; // Base64 格式的驗證碼圖片
+	message?: string; // 錯誤時的訊息
+}
+```
+
+**錯誤響應**:
+
+```json
+{
+	"success": false,
+	"message": "生成驗證碼失敗"
+}
+```
+
+**注意事項**:
+
+- ✅ 使用 JWT Token 加密,安全性更高
+- ✅ Token 包含驗證碼答案和過期時間
+- ✅ 驗證碼有效期為 5 分鐘
+- ✅ 無狀態設計,不需要伺服器端存儲
+- ✅ 建議前端提供刷新驗證碼功能
+
+---
+
+### 1.2 登入
+
+**端點**: `POST /api/auth/login`
+
+**描述**: 使用帳號密碼和驗證碼登入系統
+
+**請求 Header**:
+
+```
+Content-Type: application/json
+```
+
+**請求參數**:
+
+```json
+{
+	"account": "admin",
+	"password": "admin123",
+	"captcha": "ABCD",
+	"captchaToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**數據結構說明**:
+
+```typescript
+interface LoginRequest {
+	account: string; // 帳號
+	password: string; // 密碼
+	captcha: string; // 驗證碼文字
+	captchaToken: string; // JWT 加密的驗證碼 token
+}
+```
+
+**成功響應**:
+
+```json
+{
+	"success": true,
+	"message": "登入成功",
+	"user": {
+		"id": "1",
+		"account": "admin",
+		"name": "系統管理員",
+		"role": "admin"
+	},
+	"token": "token_1_1699876543210_xyz789"
+}
+```
+
+**數據結構說明**:
+
+```typescript
+interface User {
+	id: string;
+	account: string;
+	name: string;
+	role: string;
+}
+
+interface LoginResponse {
+	success: boolean;
+	message: string;
+	user: User;
+	token: string; // JWT token,用於後續 API 驗證
+}
+```
+
+**錯誤響應**:
+
+```json
+// 缺少必填欄位
+{
+  "success": false,
+  "message": "請填寫完整資訊"
+}
+
+// 驗證碼錯誤
+{
+  "success": false,
+  "message": "驗證碼錯誤或已過期"
+}
+
+// 帳號或密碼錯誤
+{
+  "success": false,
+  "message": "帳號或密碼錯誤"
+}
+```
+
+**後端需要設定的 Cookie**:
+
+```javascript
+// 後端必須設定 HTTP-only Cookie
+response.cookie("auth-token", token, {
+	httpOnly: true, // 防止 JavaScript 讀取
+	secure: true, // HTTPS only (production)
+	sameSite: "lax", // CSRF 防護
+	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 天有效期
+	path: "/",
+});
+```
+
+**Cookie 設定說明**:
+
+- **Cookie 名稱**: `auth-token`
+- **httpOnly**: 必須為 `true`,防止 XSS 攻擊
+- **secure**: 生產環境必須為 `true`,僅在 HTTPS 下傳輸
+- **sameSite**: 設為 `lax`,防止 CSRF 攻擊
+- **maxAge**: 7 天 (604800000 毫秒)
+- **path**: `/`,全站可用
+
+**注意事項**:
+
+- ✅ Token 會同時儲存在 **Cookie** (用於伺服器端驗證) 和 **響應 JSON** (用於客戶端存儲)
+- ✅ Cookie 由後端設定,前端無法透過 JavaScript 讀取 (安全)
+- ✅ 前端會將 token 存到 localStorage,用於 API 請求的 Authorization header
+- ✅ Middleware 可以從 `request.cookies.get('auth-token')` 讀取 token 進行路由保護
+
+---
+
+### 1.3 驗證當前用戶
+
+**端點**: `GET /api/auth/me`
+
+**描述**: 驗證 token 並獲取當前登入用戶資訊
+
+**請求 Header**:
+
+```
+Authorization: Bearer {token}
+```
+
+**請求參數**: 無
+
+**成功響應**:
+
+```json
+{
+	"success": true,
+	"user": {
+		"id": "1",
+		"account": "admin",
+		"name": "系統管理員",
+		"role": "admin"
+	}
+}
+```
+
+**數據結構說明**:
+
+```typescript
+interface MeResponse {
+	success: boolean;
+	user: User;
+	message?: string;
+}
+```
+
+**錯誤響應**:
+
+```json
+// 未提供 token
+{
+  "success": false,
+  "message": "未登入"
+}
+
+// Token 無效或已過期
+{
+  "success": false,
+  "message": "登入已過期"
+}
+```
+
+**注意事項**:
+
+- 此 API 需要在 Header 中攜帶 Authorization token
+- 前端 Axios 攔截器會自動添加此 Header
+- 用於頁面載入時檢查用戶登入狀態
+
+---
+
+### 1.4 登出
+
+**端點**: `POST /api/auth/logout`
+
+**描述**: 登出系統,清除 token
+
+**請求 Header**:
+
+```
+Authorization: Bearer {token}
+```
+
+**請求參數**: 無
+
+**成功響應**:
+
+```json
+{
+	"success": true,
+	"message": "登出成功"
+}
+```
+
+**錯誤響應**:
+
+```json
+{
+	"success": false,
+	"message": "登出失敗"
+}
+```
+
+**注意事項**:
+
+- 前端應同時清除 localStorage 中的 token
+- 清除後跳轉到登入頁
+
+---
+
+## 2. 教育訓練 API
+
+### 2.1 獲取內部訓練課程
+
+**端點**: `GET /api/training/interior`
+
+**描述**: 獲取所有內部教育訓練課程資料
 
 **請求參數**: 無
 
@@ -88,11 +385,155 @@ interface TrainingCoursesResponse {
 }
 ```
 
+**課程類別說明**:
+
+- `FT` (Function Training): 機能訓練
+- `HT` (Hierarchical Training): 層別訓練
+- `RT` (Required Training): 必修訓練
+- `OI` (Organization Improvement): 組織改善
+
 ---
 
-## 2. 聯絡我們 API
+### 2.2 獲取公開課程類別
 
-### 2.1 獲取圖片驗證碼
+**端點**: `GET /api/training/exterior/categories`
+
+**描述**: 獲取公開課程的所有類別列表
+
+**請求參數**: 無
+
+**響應格式**:
+
+```json
+{
+	"success": true,
+	"data": [
+		{
+			"id": 1,
+			"typeId": "TC-R",
+			"typeName": "台中班(零售業)"
+		},
+		{
+			"id": 2,
+			"typeId": "TY",
+			"typeName": "桃園班"
+		},
+		{
+			"id": 3,
+			"typeId": "TC-M",
+			"typeName": "台中班(工)"
+		}
+	]
+}
+```
+
+**數據結構說明**:
+
+```typescript
+interface ExteriorCategory {
+	id: number;
+	typeId: string; // 類別 ID
+	typeName: string; // 類別名稱
+}
+
+interface ExteriorCategoriesResponse {
+	success: boolean;
+	data: ExteriorCategory[];
+	message?: string;
+}
+```
+
+---
+
+### 2.3 獲取公開課程列表
+
+**端點**: `GET /api/training/exterior/courses`
+
+**描述**: 獲取所有公開課程資料
+
+**查詢參數** (選填):
+
+- `typeId`: 按類別篩選,例如 `TC-R`
+- `year`: 按年份篩選,例如 `2025`
+
+**請求範例**:
+
+```
+GET /api/training/exterior/courses
+GET /api/training/exterior/courses?typeId=TC-R
+GET /api/training/exterior/courses?year=2025
+GET /api/training/exterior/courses?typeId=TC-R&year=2025
+```
+
+**響應格式**:
+
+```json
+{
+	"success": true,
+	"data": [
+		{
+			"id": 1,
+			"typeId": "retail",
+			"typeName": "零售業",
+			"title": "115年零售業教育訓練需求調查表",
+			"date": "115/01/01",
+			"chooseYear": "2025",
+			"courseHours": "依課程而定",
+			"fee": "依課程而定",
+			"filePath": "http://www.chunlee.com.tw/..."
+		},
+		{
+			"id": 2,
+			"typeId": "retail",
+			"typeName": "零售業",
+			"title": "多店式或連鎖店店長與幹部培訓班(第七期)",
+			"date": "114/10/01",
+			"chooseYear": "2025",
+			"courseHours": "36",
+			"fee": 11500,
+			"filePath": "http://www.chunlee.com.tw/..."
+		}
+	]
+}
+```
+
+**數據結構說明**:
+
+```typescript
+interface ExteriorCourse {
+	id: number;
+	typeId: string; // 課程類型 ID
+	typeName: string; // 課程類型名稱
+	title: string; // 課程標題
+	date: string; // 課程日期 (格式: YYY/MM/DD)
+	chooseYear: string; // 年份 (用於篩選)
+	courseHours: string; // 課程時數
+	fee: string | number; // 費用 (可能是數字或文字如"依課程而定")
+	filePath: string; // 課程詳情連結
+}
+
+interface ExteriorCoursesResponse {
+	success: boolean;
+	data: ExteriorCourse[];
+	message?: string;
+}
+```
+
+**錯誤響應**:
+
+```json
+{
+	"success": false,
+	"message": "獲取課程資料失敗",
+	"error": "錯誤詳情"
+}
+```
+
+---
+
+## 3. 聯絡我們 API
+
+### 3.1 獲取圖片驗證碼
 
 **端點**: `GET /api/contact/captcha`
 
