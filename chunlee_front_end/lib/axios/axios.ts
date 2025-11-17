@@ -30,7 +30,7 @@ export function clearToken() {
 
 // 創建 Axios 實例
 const axiosInstance = axios.create({
-	baseURL: "", // 使用相對路徑
+	baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
 	timeout: 10000, // 10 秒超時
 	headers: {
 		"Content-Type": "application/json",
@@ -48,7 +48,7 @@ function shouldSkipAuth(url?: string): boolean {
 
 // 請求攔截器 - 自動添加 Authorization header
 axiosInstance.interceptors.request.use(
-  (config) => {
+	(config) => {
 		// 檢查是否為不需要 token 的 API
 		if (shouldSkipAuth(config.url)) {
 			console.log(`[Axios] 跳過 token 驗證: ${config.url}`);
@@ -59,8 +59,8 @@ axiosInstance.interceptors.request.use(
 		const token = getToken();
 
 		// 如果有 token,添加到 Authorization header
-    if (token) {
-      console.log("config.headers", config.headers);
+		if (token) {
+			console.log("config.headers", config.headers);
 			config.headers.Authorization = `Bearer ${token}`;
 			console.log(`[Axios] 添加 Authorization header: ${config.url}`);
 		}
