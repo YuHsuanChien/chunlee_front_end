@@ -30,18 +30,18 @@ function generateToken(userId: string): string {
 export async function POST(request: Request) {
 	try {
 		const body = await request.json();
-		const { account, password, captcha, captchaToken } = body;
+		const { account, password, captcha, captchaID } = body;
 
 		// 1. 驗證必填欄位
-		if (!account || !password || !captcha || !captchaToken) {
+		if (!account || !password || !captcha || !captchaID) {
 			return NextResponse.json(
 				{ success: false, message: "請填寫完整資訊" },
 				{ status: 400 }
 			);
 		}
 
-		// 2. 驗證驗證碼（JWT token 會自動檢查過期時間）
-		const isCaptchaValid = verifyCaptcha(captchaToken, captcha);
+		// 2. 驗證驗證碼（使用 captchaId 從 store 中查找）
+		const isCaptchaValid = verifyCaptcha(captchaID, captcha);
 		if (!isCaptchaValid) {
 			return NextResponse.json(
 				{ success: false, message: "驗證碼錯誤或已過期" },

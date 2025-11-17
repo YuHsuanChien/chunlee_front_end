@@ -2,21 +2,21 @@ import { NextResponse } from "next/server";
 
 // 使用 global 來保存 Map,避免在開發模式下 hot reload 時被重置
 declare global {
-	var captchaStore:
+	var contactCaptchaStore:
 		| Map<string, { text: string; expiresAt: number }>
 		| undefined;
 }
 
 // 暫存驗證碼資料（實際應用中應該使用 Redis 或資料庫）
 const captchaStore =
-	global.captchaStore ||
-	(global.captchaStore = new Map<
+	global.contactCaptchaStore ||
+	(global.contactCaptchaStore = new Map<
 		string,
 		{ text: string; expiresAt: number }
 	>());
 
 // 定期清理過期的驗證碼（只設置一次）
-if (!global.captchaStore) {
+if (!global.contactCaptchaStore) {
 	setInterval(() => {
 		const now = Date.now();
 		for (const [id, data] of captchaStore.entries()) {
@@ -39,8 +39,6 @@ function generateCaptchaText(): string {
 
 // 生成驗證碼圖片（使用 SVG 格式）
 function generateCaptchaImage(text: string): string {
-	// 創建簡單的 SVG 驗證碼圖片
-	// 實際應用中可使用 node-canvas 套件生成更複雜的圖片
 	const svg = `
     <svg width="120" height="40" xmlns="http://www.w3.org/2000/svg">
       <rect width="120" height="40" fill="#f3f4f6"/>
@@ -55,7 +53,6 @@ function generateCaptchaImage(text: string): string {
     </svg>
   `;
 
-	// 將 SVG 轉換為 base64
 	const base64 = Buffer.from(svg).toString("base64");
 	return `data:image/svg+xml;base64,${base64}`;
 }
@@ -78,8 +75,6 @@ export async function GET() {
 			expiresAt: expiresAt,
 		});
 
-		console.log("captchaStore after set:", captchaStore);
-
 		// 返回新格式: { id, img } (不包含 text)
 		return NextResponse.json({
 			id: captchaId,
@@ -94,7 +89,7 @@ export async function GET() {
 	}
 }
 
-// 驗證驗證碼（供登入 API 使用）
+// 驗證驗證碼（供聯絡表單 API 使用）
 export function verifyCaptcha(
 	captchaId: string,
 	captchaInput: string
@@ -102,7 +97,6 @@ export function verifyCaptcha(
 	try {
 		// 從暫存中取得驗證碼資料
 		const captchaData = captchaStore.get(captchaId);
-		console.log("captchaStore:", captchaStore);
 
 		// 檢查驗證碼是否存在
 		if (!captchaData) {

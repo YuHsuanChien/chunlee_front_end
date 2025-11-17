@@ -1,9 +1,5 @@
 "use client";
-import {
-	ExteriorListProps,
-	ExteriorListData,
-	ExteriorCourseItem,
-} from "@/lib/interfaces";
+import { ExteriorListProps, ExteriorListData } from "@/lib/interfaces";
 import { IoChevronDown, IoSearch, IoDownload } from "react-icons/io5";
 import { useState, useMemo } from "react";
 import { Pagination } from "@/components/frontend/common";
@@ -15,8 +11,8 @@ export const ExteriorList = ({
 	// 新增「全部」選項
 	const allCategory: ExteriorListData = {
 		id: 0,
-		typeId: "ALL",
-		typeName: "全部",
+		code: "ALL",
+		name: "全部",
 	};
 
 	const [selectItem, setSelectItem] = useState<ExteriorListData>(allCategory);
@@ -25,24 +21,14 @@ export const ExteriorList = ({
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 12; // 每頁顯示 12 筆
 
-	// 取得所有課程資料
-	const allCourses = useMemo(() => {
-		const courses: ExteriorCourseItem[] = [];
-		courseData.forEach((category) => {
-			category.courseList.forEach((course) => {
-				courses.push(course);
-			});
-		});
-		return courses;
-	}, [courseData]);
-
 	// 根據選擇的分類過濾課程
 	const filteredCourses = useMemo(() => {
-		if (selectItem.typeId === "ALL") {
-			return allCourses;
+		if (selectItem.code === "ALL") {
+			return courseData;
 		}
-		return allCourses.filter((course) => course.typeId === selectItem.typeId);
-	}, [selectItem, allCourses]);
+		// 根據 code 過濾課程
+		return courseData.filter((course) => course.code === selectItem.code);
+	}, [selectItem, courseData]);
 
 	// 根據關鍵字搜尋
 	const searchedCourses = useMemo(() => {
@@ -65,6 +51,7 @@ export const ExteriorList = ({
 	}, [currentPage, searchedCourses, itemsPerPage]);
 
 	function handleItemClick(item: ExteriorListData) {
+		console.log("item", item);
 		setSelectItem(item);
 		setCurrentPage(1); // 切換分類時重置頁碼
 	}
@@ -81,7 +68,7 @@ export const ExteriorList = ({
 	}
 
 	return (
-		<section className='max-w-[1600px] mx-auto px-6 lg:px-12 grid lg:grid-cols-4 gap-3 lg:gap-6 pb-12 lg:pb-20 lg:pb-24'>
+		<section className='max-w-[1600px] mx-auto px-6 lg:px-12 grid lg:grid-cols-5 gap-3 lg:gap-6 pb-12 lg:pb-24'>
 			{/* 項目 */}
 			<div className='lg:col-span-1'>
 				<div
@@ -89,7 +76,7 @@ export const ExteriorList = ({
 					onClick={() => {
 						setIsOpen(!isOpen);
 					}}>
-					<p className='font-medium'>{selectItem.typeName}</p>
+					<p className='font-medium'>{selectItem.name}</p>
 					<IoChevronDown
 						className={`text-2xl transition-all duration-500 ${
 							isOpen ? "rotate-180" : ""
@@ -106,7 +93,7 @@ export const ExteriorList = ({
 					<li
 						key={allCategory.id}
 						className={`w-full border-b border-gray-200 py-3 lg:py-6 px-3 cursor-pointer hover:bg-[#2b68b3] hover:text-white text-start ${
-							selectItem.typeName === allCategory.typeName
+							selectItem.name === allCategory.name
 								? "bg-[#2b68b3] text-white"
 								: ""
 						}`}
@@ -114,7 +101,7 @@ export const ExteriorList = ({
 							handleItemClick(allCategory);
 							setIsOpen(!isOpen);
 						}}>
-						{allCategory.typeName}
+						{allCategory.name}
 					</li>
 					{/* 其他分類 */}
 					{exteriorList &&
@@ -122,7 +109,7 @@ export const ExteriorList = ({
 							<li
 								key={item.id}
 								className={`w-full border-b last:border-0 border-gray-200 py-3 lg:py-6 px-3 cursor-pointer hover:bg-[#2b68b3] hover:text-white text-start ${
-									selectItem?.typeName === item.typeName
+									selectItem?.name === item.name
 										? "bg-[#2b68b3] text-white"
 										: ""
 								}`}
@@ -130,13 +117,13 @@ export const ExteriorList = ({
 									handleItemClick(item);
 									setIsOpen(!isOpen);
 								}}>
-								{item.typeName}
+								{item.name}
 							</li>
 						))}
 				</ul>
 			</div>
 			{/* 服務清單 */}
-			<div className='lg:col-span-3'>
+			<div className='lg:col-span-4'>
 				<div className='px-5 py-4 flex flex-col lg:flex-row justify-between items-center bg-linear-to-r from-[#2b68b3] to-[#4a90e2] rounded-md mb-6 shadow-md gap-3'>
 					<h2 className='text-lg lg:text-2xl font-semibold text-white'>
 						快速搜尋
@@ -164,7 +151,7 @@ export const ExteriorList = ({
 				{/* 課程資料 */}
 				<div className='w-full'>
 					<div className='thead w-full hidden lg:flex justify-between items-center border-b-2 border-gray-950 mb-3'>
-						<div className='relative p-3 w-36 text-center text-base text-gray-500 after:content-["|"] after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:text-gray-300'>
+						<div className='relative p-3 w-52 text-center text-base text-gray-500 after:content-["|"] after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:text-gray-300'>
 							開課日期
 						</div>
 						<div className='relative flex-1 p-3 text-start text-base text-gray-500 after:content-["|"] after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:text-gray-300'>
@@ -191,14 +178,17 @@ export const ExteriorList = ({
 									{/* 手機版標題顯示 */}
 									<div className='lg:hidden w-full'>
 										<h3 className='font-bold text-lg mb-2'>{course.title}</h3>
-										<div className='grid grid-cols-2 gap-2 text-sm'>
+										<div className='grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm'>
 											<div>
 												<span className='text-gray-500'>開課日期：</span>
-												<span>{course.date}</span>
+												<span>
+													{new Date(course.startAt).toLocaleDateString()}-
+													{new Date(course.endAt).toLocaleDateString()}
+												</span>
 											</div>
 											<div>
 												<span className='text-gray-500'>課程時數：</span>
-												<span>{course.courseHours}小時</span>
+												<span>{course.trainingHours}小時</span>
 											</div>
 											<div>
 												<span className='text-gray-500'>課程費用：</span>
@@ -220,14 +210,15 @@ export const ExteriorList = ({
 									</div>
 
 									{/* 桌面版顯示 */}
-									<div className='hidden lg:block relative p-3 w-36 text-center'>
-										{course.date}
+									<div className='hidden lg:block relative p-3 w-52 text-start'>
+										{new Date(course.startAt).toLocaleDateString()} -{" "}
+										{new Date(course.endAt).toLocaleDateString()}
 									</div>
 									<div className='hidden lg:block relative flex-1 p-3 text-start font-medium'>
 										{course.title}
 									</div>
 									<div className='hidden lg:block relative p-3 w-36 text-center'>
-										{course.courseHours}
+										{course.trainingHours}
 									</div>
 									<div className='hidden lg:block relative p-3 w-36 text-center'>
 										{typeof course.fee === "number"

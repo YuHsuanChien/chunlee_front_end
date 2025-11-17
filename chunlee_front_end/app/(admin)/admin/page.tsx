@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "../../../../lib/axios/providers/AuthProvider";
+import { useAuth } from "../../../lib/axios/providers/AuthProvider";
 
 export default function AdminHome() {
 	const { user } = useAuth();

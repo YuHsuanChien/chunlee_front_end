@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 interface FormData {
 	name: string;
@@ -16,6 +17,11 @@ interface FormErrors {
 	captcha?: string;
 }
 
+interface CaptchaResponse {
+	id: string;
+	img: string;
+}
+
 export const ContactForm = () => {
 	const [formData, setFormData] = useState<FormData>({
 		name: "",
@@ -27,6 +33,29 @@ export const ContactForm = () => {
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [showErrors, setShowErrors] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [captchaData, setCaptchaData] = useState<{
+		id: string;
+		img: string;
+	} | null>(null);
+
+	// 獲取驗證碼
+	const fetchCaptcha = async () => {
+		try {
+			const response = await axios.get("/api/contact/captcha");
+			const data: CaptchaResponse = response.data;
+			setCaptchaData({
+				id: data.id,
+				img: data.img,
+			});
+		} catch (err) {
+			console.error("獲取驗證碼失敗:", err);
+		}
+	};
+
+	// 頁面初始載入時獲取驗證碼
+	useEffect(() => {
+		fetchCaptcha();
+	}, []);
 
 	// 驗證函數
 	const validateForm = (): FormErrors => {
@@ -56,14 +85,20 @@ export const ContactForm = () => {
 			newErrors.message = "訊息內容至少需要10個字元";
 		}
 
-		// 驗證碼驗證 (13 - 6 = 7)
+		// 驗證碼驗證
 		if (!formData.captcha.trim()) {
 			newErrors.captcha = "這是必填欄位";
-		} else if (formData.captcha.trim() !== "7") {
-			newErrors.captcha = "答案不正確，請重新計算";
+		} else if (formData.captcha.trim().length !== 4) {
+			newErrors.captcha = "請輸入4位驗證碼";
 		}
 
 		return newErrors;
+	};
+
+	// 刷新驗證碼
+	const handleRefreshCaptcha = () => {
+		fetchCaptcha();
+		setFormData((prev) => ({ ...prev, captcha: "" }));
 	};
 
 	// 處理輸入變更
@@ -102,27 +137,41 @@ export const ContactForm = () => {
 		}
 
 		try {
-			// 這裡可以添加實際的表單送出邏輯
-			// 例如：await submitContactForm(formData);
+			if (!captchaData?.id) {
+				throw new Error("驗證碼尚未載入");
+			}
 
-			// 模擬API呼叫
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			// 成功送出後的處理
-			alert("表單已成功送出！我們會盡快回覆您。");
-
-			// 重置表單
-			setFormData({
-				name: "",
-				email: "",
-				message: "",
-				captcha: "",
+			// 提交表單到後端 API
+			const response = await axios.post("/api/contact/submit", {
+				name: formData.name,
+				email: formData.email,
+				message: formData.message,
+				captcha: formData.captcha,
+				captchaId: captchaData.id,
 			});
-			setErrors({});
-			setShowErrors(false);
+
+			if (response.data.success) {
+				// 成功送出後的處理
+				alert("表單已成功送出！我們會盡快回覆您。");
+
+				// 重置表單
+				setFormData({
+					name: "",
+					email: "",
+					message: "",
+					captcha: "",
+				});
+				setErrors({});
+				setShowErrors(false);
+
+				// 重新獲取驗證碼
+				fetchCaptcha();
+			}
 		} catch (error: unknown) {
 			console.error("表單送出錯誤:", error);
 			alert("送出失敗，請稍後再試。");
+			// 刷新驗證碼
+			handleRefreshCaptcha();
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -213,20 +262,39 @@ export const ContactForm = () => {
 						{/* Captcha Field */}
 						<div>
 							<label className='block text-gray-700 font-medium mb-2'>
-								What is thirteen minus 6?{" "}
-								<span className='text-red-500'>*</span>
+								驗證碼 <span className='text-red-500'>*</span>
 							</label>
-							<input
-								type='text'
-								name='captcha'
-								value={formData.captcha}
-								onChange={handleInputChange}
-								className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
-									errors.captcha
-										? "border-red-500 focus:ring-red-500"
-										: "border-gray-300 focus:ring-blue-500"
-								}`}
-							/>
+							<div className='flex gap-3'>
+								<input
+									type='text'
+									name='captcha'
+									value={formData.captcha}
+									onChange={handleInputChange}
+									placeholder='請輸入驗證碼'
+									className={`flex-1 px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+										errors.captcha
+											? "border-red-500 focus:ring-red-500"
+											: "border-gray-300 focus:ring-blue-500"
+									}`}
+								/>
+								{/* 驗證碼圖片 */}
+								<div className='shrink-0 relative'>
+									<div
+										onClick={handleRefreshCaptcha}
+										className='w-32 h-12 bg-gray-200 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-300 transition overflow-hidden'
+										title='點擊刷新驗證碼'>
+										{captchaData?.img ? (
+											<img
+												src={captchaData.img}
+												alt='驗證碼'
+												className='w-full h-full object-cover'
+											/>
+										) : (
+											<span className='text-gray-400 text-xs'>載入中...</span>
+										)}
+									</div>
+								</div>
+							</div>
 							<p
 								className={`text-red-500 text-sm mt-1 transition-opacity duration-300 ${
 									showErrors && errors.captcha ? "opacity-100" : "opacity-0"

@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../../lib/axios/providers/AuthProvider";
 import axios from "@/lib/axios/axios";
+import { AxiosError } from "axios";
+
 
 interface CaptchaResponse {
-	success: boolean;
-	captchaToken: string; // JWT 加密的驗證碼 token
-	captchaImage: string; // Base64 格式的驗證碼圖片
+	id: string; // JWT 加密的驗證碼 token
+	img: string; // Base64 格式的驗證碼圖片
 	message?: string; // 錯誤時的訊息
 }
 
@@ -19,8 +20,8 @@ export default function AdminLoginPage() {
 		captcha: "",
 	});
 	const [captchaData, setCaptchaData] = useState<{
-		token: string;
-		image: string;
+		captchaID: string;
+		captchaImage: string;
 	} | null>(null);
 	const [error, setError] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
@@ -32,10 +33,10 @@ export default function AdminLoginPage() {
 			const response = await axios.get("/api/auth/captcha");
 			const data: CaptchaResponse = response.data;
 
-			if (data.success) {
+			if (data) {
 				setCaptchaData({
-					token: data.captchaToken,
-					image: data.captchaImage,
+					captchaID: data.id,
+					captchaImage: data.img,
 				});
 			}
 		} catch (err) {
@@ -70,7 +71,7 @@ export default function AdminLoginPage() {
 		setIsLoading(true);
 
 		try {
-			if (!captchaData?.token) {
+			if (!captchaData?.captchaID) {
 				throw new Error("驗證碼尚未載入");
 			}
 
@@ -79,12 +80,23 @@ export default function AdminLoginPage() {
 				formData.account,
 				formData.password,
 				formData.captcha,
-				captchaData.token
+				captchaData.captchaID
 			);
+
+
 
 			// 登入成功，AuthProvider 會自動處理跳轉
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "登入失敗，請重試");
+			console.log("err", err);
+			// 處理 AxiosError
+			if (err instanceof AxiosError) {
+				const errorMessage = err.response?.data?.message || "登入失敗，請重試";
+				setError(errorMessage);
+			} else if (err instanceof Error) {
+				setError(err.message);
+			} else {
+				setError("登入失敗，請重試");
+			}
 			// 登入失敗後刷新驗證碼
 			handleRefreshCaptcha();
 		} finally {
@@ -187,9 +199,9 @@ export default function AdminLoginPage() {
 									onClick={handleRefreshCaptcha}
 									className='w-32 h-12 bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-300 transition overflow-hidden'
 									title='點擊刷新驗證碼'>
-									{captchaData?.image ? (
+									{captchaData?.captchaImage ? (
 										<img
-											src={captchaData.image}
+											src={captchaData.captchaImage}
 											alt='驗證碼'
 											className='w-full h-full object-cover'
 										/>

@@ -25,7 +25,7 @@ interface AuthContextType {
 		account: string,
 		password: string,
 		captcha: string,
-		captchaToken: string
+		captchaID: string
 	) => Promise<void>;
 	logout: () => Promise<void>;
 	isLoading: boolean;
@@ -90,14 +90,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		account: string,
 		password: string,
 		captcha: string,
-		captchaToken: string
+		captchaID: string
 	) => {
 		// 使用 Axios
 		const response = await axios.post("/api/auth/login", {
 			account,
 			password,
 			captcha,
-			captchaToken,
+			captchaID,
 		});
 
 		const data = response.data;

@@ -1,13 +1,13 @@
 import { Banner, Slogan } from "@/components/frontend/common";
 import { fetchJsonData } from "@/lib/hooks";
-import { ExteriorListData, ExteriorCourseData } from "@/lib/interfaces";
+import { ExteriorListData, ExteriorCourseItem } from "@/lib/interfaces";
 import { ExteriorList } from "@/components/frontend/training-program";
 
 export default async function Exterior() {
 	const exteriorList = await fetchJsonData<ExteriorListData[]>(
 		"exteriorList.json"
 	);
-	const courseData = await fetchJsonData<ExteriorCourseData[]>("exterior.json");
+	const courseData = await fetchJsonData<ExteriorCourseItem[]>("exterior.json");
 
 	return (
 		<section>

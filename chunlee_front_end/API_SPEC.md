@@ -410,18 +410,18 @@ interface TrainingCoursesResponse {
 	"data": [
 		{
 			"id": 1,
-			"typeId": "TC-R",
-			"typeName": "台中班(零售業)"
+			"code": "TC-R",
+			"name": "台中班(零售業)"
 		},
 		{
 			"id": 2,
-			"typeId": "TY",
-			"typeName": "桃園班"
+			"code": "TY",
+			"name": "桃園班"
 		},
 		{
 			"id": 3,
-			"typeId": "TC-M",
-			"typeName": "台中班(工)"
+			"code": "TC-M",
+			"name": "台中班(工)"
 		}
 	]
 }
@@ -430,15 +430,15 @@ interface TrainingCoursesResponse {
 **數據結構說明**:
 
 ```typescript
-interface ExteriorCategory {
+interface ExteriorListData {
 	id: number;
-	typeId: string; // 類別 ID
-	typeName: string; // 類別名稱
+	code: string; // 類別代碼
+	name: string; // 類別名稱
 }
 
 interface ExteriorCategoriesResponse {
 	success: boolean;
-	data: ExteriorCategory[];
+	data: ExteriorListData[];
 	message?: string;
 }
 ```
@@ -453,16 +453,16 @@ interface ExteriorCategoriesResponse {
 
 **查詢參數** (選填):
 
-- `typeId`: 按類別篩選,例如 `TC-R`
+- `code`: 按類別代碼篩選,例如 `TC-R`
 - `year`: 按年份篩選,例如 `2025`
 
 **請求範例**:
 
 ```
 GET /api/training/exterior/courses
-GET /api/training/exterior/courses?typeId=TC-R
+GET /api/training/exterior/courses?code=TC-R
 GET /api/training/exterior/courses?year=2025
-GET /api/training/exterior/courses?typeId=TC-R&year=2025
+GET /api/training/exterior/courses?code=TC-R&year=2025
 ```
 
 **響應格式**:
@@ -473,23 +473,23 @@ GET /api/training/exterior/courses?typeId=TC-R&year=2025
 	"data": [
 		{
 			"id": 1,
-			"typeId": "retail",
-			"typeName": "零售業",
+			"code": "TC-R",
 			"title": "115年零售業教育訓練需求調查表",
-			"date": "115/01/01",
-			"chooseYear": "2025",
-			"courseHours": "依課程而定",
+			"loction": "台中",
+			"startAt": "115/01/01",
+			"endAt": "115/01/01",
+			"trainingHours": "依課程而定",
 			"fee": "依課程而定",
 			"filePath": "http://www.chunlee.com.tw/..."
 		},
 		{
 			"id": 2,
-			"typeId": "retail",
-			"typeName": "零售業",
+			"code": "TC-R",
 			"title": "多店式或連鎖店店長與幹部培訓班(第七期)",
-			"date": "114/10/01",
-			"chooseYear": "2025",
-			"courseHours": "36",
+			"loction": "台中",
+			"startAt": "114/10/01",
+			"endAt": "114/10/01",
+			"trainingHours": "36",
 			"fee": 11500,
 			"filePath": "http://www.chunlee.com.tw/..."
 		}
@@ -500,21 +500,21 @@ GET /api/training/exterior/courses?typeId=TC-R&year=2025
 **數據結構說明**:
 
 ```typescript
-interface ExteriorCourse {
+interface ExteriorCourseItem {
 	id: number;
-	typeId: string; // 課程類型 ID
-	typeName: string; // 課程類型名稱
+	code: string; // 課程類別代碼 (對應 ExteriorListData 的 code)
 	title: string; // 課程標題
-	date: string; // 課程日期 (格式: YYY/MM/DD)
-	chooseYear: string; // 年份 (用於篩選)
-	courseHours: string; // 課程時數
+	loction: string; // 課程地點
+	startAt: string; // 開始日期 (格式: YYY/MM/DD)
+	endAt: string; // 結束日期 (格式: YYY/MM/DD)
+	trainingHours: string; // 訓練時數
 	fee: string | number; // 費用 (可能是數字或文字如"依課程而定")
 	filePath: string; // 課程詳情連結
 }
 
 interface ExteriorCoursesResponse {
 	success: boolean;
-	data: ExteriorCourse[];
+	data: ExteriorCourseItem[];
 	message?: string;
 }
 ```
@@ -806,7 +806,7 @@ export interface Course {
 	content: string[];
 }
 
-export interface CourseCategory {
+export interface InteriorData {
 	courseId: string;
 	courseName: string;
 	courseList: Course[];
@@ -814,7 +814,38 @@ export interface CourseCategory {
 
 export interface TrainingCoursesResponse {
 	success: boolean;
-	data: CourseCategory[];
+	data: InteriorData[];
+	message?: string;
+}
+
+// ==================== 公開課程 ====================
+export interface ExteriorListData {
+	id: number;
+	code: string; // 類別代碼
+	name: string; // 類別名稱
+}
+
+export interface ExteriorCourseItem {
+	id: number;
+	code: string; // 課程類別代碼 (對應 ExteriorListData 的 code)
+	title: string; // 課程標題
+	loction: string; // 課程地點
+	startAt: string; // 開始日期 (格式: YYY/MM/DD)
+	endAt: string; // 結束日期 (格式: YYY/MM/DD)
+	trainingHours: string; // 訓練時數
+	fee: string | number; // 費用 (可能是數字或文字如"依課程而定")
+	filePath: string; // 課程詳情連結
+}
+
+export interface ExteriorCategoriesResponse {
+	success: boolean;
+	data: ExteriorListData[];
+	message?: string;
+}
+
+export interface ExteriorCoursesResponse {
+	success: boolean;
+	data: ExteriorCourseItem[];
 	message?: string;
 }
 
