@@ -27,7 +27,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		// 如果沒有登入且不在登入頁，跳轉到登入頁（雙重保護）
 		if (!isLoading && !user && !isLoginPage) {
-			console.log("[Layout] 用戶未登入，重定向到登入頁");
+			// console.log("[Layout] 用戶未登入，重定向到登入頁");
 			router.push(`/admin/login?from=${pathname}`);
 		}
 	}, [user, isLoading, pathname, isLoginPage, router]);

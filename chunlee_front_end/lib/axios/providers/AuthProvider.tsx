@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import axios, { setToken, clearToken } from "@/lib/axios/axios";
+import { AxiosError } from "axios";
 
 // 用戶資料類型
 export interface User {
@@ -61,14 +62,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			}
 
 			// 使用 Axios，攔截器會自動添加 Authorization header
-			const response = await axios.get("/api/auth/me");
+			const response = await axios.get("/auth/me");
 
 			if (response.data.success && response.data.user) {
 				setUser(response.data.user);
-				console.log("[AuthProvider] 用戶已登入:", response.data.user.name);
 			} else {
 				setUser(null);
-				console.log("[AuthProvider] 用戶未登入");
 			}
 		} catch (error) {
 			console.error("[AuthProvider] 檢查認證失敗:", error);
@@ -90,39 +89,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		account: string,
 		password: string,
 		captcha: string,
-		captchaID: string
+		captchaId: string
 	) => {
-		// 使用 Axios
-		const response = await axios.post("/api/auth/login", {
-			account,
-			password,
-			captcha,
-			captchaID,
-		});
+		try {
+			// 使用 Axios
+			const response = await axios.post("/auth/login", {
+				account,
+				password,
+				captcha,
+				captchaId,
+			});
 
-		const data = response.data;
+			const data = response.data;
 
-		if (!data.success || !data.user || !data.token) {
-			throw new Error(data.message || "登入失敗");
+			if (!data.success || !data.user || !data.token) {
+				throw new Error(data.message || "登入失敗");
+			}
+
+			// 保存 token 到 localStorage（Axios 攔截器會自動使用）
+			setToken(data.token);
+			setUser(data.user);
+
+			// 登入成功後跳轉
+			const searchParams = new URLSearchParams(window.location.search);
+			const from = searchParams.get("from");
+			const redirectPath =
+				from && from !== "/admin/login" && from !== "login" ? from : "/admin";
+			router.push(redirectPath);
+		} catch (error) {
+			// 加入詳細的錯誤處理
+			console.error("[AuthProvider] 登入失敗:", error);
+			if (error instanceof AxiosError && error.response) {
+				console.error("[AuthProvider] 錯誤回應:", error.response.data);
+				console.error("[AuthProvider] 錯誤狀態:", error.response.status);
+			} else {
+				console.error("[AuthProvider] 未知錯誤:", error);
+			}
+			throw error; // 重新拋出錯誤讓上層處理
 		}
-
-		// 保存 token 到 localStorage（Axios 攔截器會自動使用）
-		setToken(data.token);
-		setUser(data.user);
-		console.log("[AuthProvider] 登入成功:", data.user.name);
-		console.log("[AuthProvider] Token 已保存到 localStorage");
-
-		// 登入成功後跳轉
-		const searchParams = new URLSearchParams(window.location.search);
-		const from = searchParams.get("from") || "/admin/admin-home";
-		router.push(from);
 	};
 
 	// 登出功能
 	const logout = async () => {
 		try {
 			// 使用 Axios，攔截器會自動添加 Authorization header
-			await axios.post("/api/auth/logout");
+			await axios.post("/auth/logout");
 
 			// 清除 token 和用戶狀態
 			clearToken();

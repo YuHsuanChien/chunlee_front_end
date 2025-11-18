@@ -51,7 +51,6 @@ export const ExteriorList = ({
 	}, [currentPage, searchedCourses, itemsPerPage]);
 
 	function handleItemClick(item: ExteriorListData) {
-		console.log("item", item);
 		setSelectItem(item);
 		setCurrentPage(1); // 切換分類時重置頁碼
 	}

@@ -5,11 +5,11 @@ import { useAuth } from "../../../../lib/axios/providers/AuthProvider";
 import axios from "@/lib/axios/axios";
 import { AxiosError } from "axios";
 
-
 interface CaptchaResponse {
-	id: string; // JWT 加密的驗證碼 token
-	img: string; // Base64 格式的驗證碼圖片
+	captchaId: string; // JWT 加密的驗證碼 token
+	captchaImage: string; // Base64 格式的驗證碼圖片
 	message?: string; // 錯誤時的訊息
+	sucess?: boolean; // 是否成功
 }
 
 export default function AdminLoginPage() {
@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
 		captcha: "",
 	});
 	const [captchaData, setCaptchaData] = useState<{
-		captchaID: string;
+		captchaId: string;
 		captchaImage: string;
 	} | null>(null);
 	const [error, setError] = useState("");
@@ -30,13 +30,13 @@ export default function AdminLoginPage() {
 	const fetchCaptcha = async () => {
 		try {
 			// 使用 Axios（驗證碼 API 不需要 token，攔截器會自動處理）
-			const response = await axios.get("/api/auth/captcha");
+			const response = await axios.get("/auth/captcha");
 			const data: CaptchaResponse = response.data;
 
 			if (data) {
 				setCaptchaData({
-					captchaID: data.id,
-					captchaImage: data.img,
+					captchaId: data.captchaId,
+					captchaImage: data.captchaImage,
 				});
 			}
 		} catch (err) {
@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
 		setIsLoading(true);
 
 		try {
-			if (!captchaData?.captchaID) {
+			if (!captchaData?.captchaId) {
 				throw new Error("驗證碼尚未載入");
 			}
 
@@ -80,10 +80,8 @@ export default function AdminLoginPage() {
 				formData.account,
 				formData.password,
 				formData.captcha,
-				captchaData.captchaID
+				captchaData.captchaId
 			);
-
-
 
 			// 登入成功，AuthProvider 會自動處理跳轉
 		} catch (err) {

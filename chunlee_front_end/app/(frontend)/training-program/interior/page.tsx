@@ -5,7 +5,6 @@ import { InteriorData } from "@/lib/interfaces";
 
 export default async function Interior() {
 	const data = await fetchJsonData<InteriorData[]>("interior.json");
-	console.log("data", data);
 
 	return (
 		<section>

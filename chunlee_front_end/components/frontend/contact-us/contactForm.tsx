@@ -41,7 +41,7 @@ export const ContactForm = () => {
 	// 獲取驗證碼
 	const fetchCaptcha = async () => {
 		try {
-			const response = await axios.get("/api/contact/captcha");
+			const response = await axios.get("/contact/captcha");
 			const data: CaptchaResponse = response.data;
 			setCaptchaData({
 				id: data.id,
@@ -142,7 +142,7 @@ export const ContactForm = () => {
 			}
 
 			// 提交表單到後端 API
-			const response = await axios.post("/api/contact/submit", {
+			const response = await axios.post("/contact/submit", {
 				name: formData.name,
 				email: formData.email,
 				message: formData.message,

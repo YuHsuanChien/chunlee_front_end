@@ -4,7 +4,7 @@ import { useAuth } from "../../../lib/axios/providers/AuthProvider";
 
 export default function AdminHome() {
 	const { user } = useAuth();
-	console.log(user);
+	// console.log(user);
 
 	return (
 		<div className='space-y-6'>
