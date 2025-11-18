@@ -14,6 +14,11 @@ export interface InteriorData {
 }
 
 export interface ExteriorListData {
+	success: boolean;
+	data: ExteriorListItemData[];
+}
+
+export interface ExteriorListItemData {
 	id: number;
 	code: string;
 	name: string;
@@ -43,6 +48,6 @@ export interface Course {
 }
 
 export interface ExteriorListProps {
-	exteriorList: ExteriorListData[];
+	exteriorList: ExteriorListItemData[];
 	courseData: ExteriorCourseItem[];
 }

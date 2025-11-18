@@ -1,5 +1,5 @@
 "use client";
-import { ExteriorListProps, ExteriorListData } from "@/lib/interfaces";
+import { ExteriorListProps, ExteriorListItemData } from "@/lib/interfaces";
 import { IoChevronDown, IoSearch, IoDownload } from "react-icons/io5";
 import { useState, useMemo } from "react";
 import { Pagination } from "@/components/frontend/common";
@@ -9,13 +9,14 @@ export const ExteriorList = ({
 	courseData,
 }: ExteriorListProps) => {
 	// 新增「全部」選項
-	const allCategory: ExteriorListData = {
+	const allCategory: ExteriorListItemData = {
 		id: 0,
 		code: "ALL",
 		name: "全部",
 	};
 
-	const [selectItem, setSelectItem] = useState<ExteriorListData>(allCategory);
+	const [selectItem, setSelectItem] =
+		useState<ExteriorListItemData>(allCategory);
 	const [isOpen, setIsOpen] = useState(false);
 	const [keyword, setKeyword] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +51,7 @@ export const ExteriorList = ({
 		return searchedCourses.slice(startIndex, endIndex);
 	}, [currentPage, searchedCourses, itemsPerPage]);
 
-	function handleItemClick(item: ExteriorListData) {
+	function handleItemClick(item: ExteriorListItemData) {
 		setSelectItem(item);
 		setCurrentPage(1); // 切換分類時重置頁碼
 	}

@@ -1,12 +1,18 @@
 import { Banner, Slogan } from "@/components/frontend/common";
-import { fetchJsonData } from "@/lib/hooks";
+import { fetchJsonData, fecthcPubilcData } from "@/lib/hooks";
 import { ExteriorListData, ExteriorCourseItem } from "@/lib/interfaces";
 import { ExteriorList } from "@/components/frontend/training-program";
 
 export default async function Exterior() {
-	const exteriorList = await fetchJsonData<ExteriorListData[]>(
-		"exteriorList.json"
+	// 取得外部課程分類列表(這是本地的json檔案範例)
+	// const exteriorList = await fetchJsonData<ExteriorListData[]>(
+	// 	"exteriorList.json"
+	// );
+
+	const exteriorList = await fecthcPubilcData<ExteriorListData>(
+		"/training/exterior/categories"
 	);
+
 	const courseData = await fetchJsonData<ExteriorCourseItem[]>("exterior.json");
 
 	return (
@@ -20,8 +26,11 @@ export default async function Exterior() {
 				bgColor='bg-gray-300'
 			/>
 			<Slogan title='公開課程' description='' />
-			{exteriorList && courseData && (
-				<ExteriorList exteriorList={exteriorList} courseData={courseData} />
+			{exteriorList.data && courseData && (
+				<ExteriorList
+					exteriorList={exteriorList.data}
+					courseData={courseData}
+				/>
 			)}
 		</section>
 	);

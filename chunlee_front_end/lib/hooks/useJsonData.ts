@@ -4,7 +4,7 @@
  * @returns Promise<T> - 返回解析後的 JSON 數據
  */
 export async function fetchJsonData<T>(filename: string): Promise<T> {
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001";
 	const res = await fetch(`${baseUrl}/json/${filename}`, {
 		cache: "force-cache", // 使用 Next.js 的靜態生成緩存
 	});
