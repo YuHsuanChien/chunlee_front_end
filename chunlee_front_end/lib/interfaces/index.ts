@@ -51,3 +51,40 @@ export interface ExteriorListProps {
 	exteriorList: ExteriorListItemData[];
 	courseData: ExteriorCourseItem[];
 }
+
+// 後台課程管理相關介面
+export interface AdminCourse {
+	id: number;
+	code: string;
+	title: string;
+	category: string;
+	categoryId: number;
+	startAt: string;
+	endAt: string;
+	trainingHours: number;
+	fee: number;
+	location: string;
+	status: "draft" | "published" | "archived";
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface AdminCourseFormData {
+	code: string;
+	title: string;
+	categoryId: number;
+	startAt: string;
+	endAt: string;
+	trainingHours: number;
+	fee: number;
+	location: string;
+	status: "draft" | "published" | "archived";
+}
+
+export interface AdminCoursesResponse {
+	success: boolean;
+	data: AdminCourse[];
+	total: number;
+	page: number;
+	pageSize: number;
+}
