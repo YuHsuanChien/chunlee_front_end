@@ -57,8 +57,6 @@ export interface AdminCourse {
 	id: number;
 	code: string;
 	title: string;
-	category: string;
-	categoryId: number;
 	startAt: string;
 	endAt: string;
 	trainingHours: number;
@@ -69,10 +67,27 @@ export interface AdminCourse {
 	updatedAt: string;
 }
 
+export interface CourseDatePair {
+	id: string;
+	startAt: string;
+	endAt: string;
+}
+
 export interface AdminCourseFormData {
 	code: string;
 	title: string;
-	categoryId: number;
+	dates: CourseDatePair[];
+	trainingHours: number;
+	fee: number;
+	location: string;
+	status: "draft" | "published" | "archived";
+}
+
+// 編輯課程用的表單資料 (單一日期)
+export interface AdminCourseEditFormData {
+	id?: string;
+	code: string;
+	title: string;
 	startAt: string;
 	endAt: string;
 	trainingHours: number;
@@ -87,4 +102,9 @@ export interface AdminCoursesResponse {
 	total: number;
 	page: number;
 	pageSize: number;
+}
+
+export interface CategoryOptions {
+	value: string | number;
+	label: string;
 }

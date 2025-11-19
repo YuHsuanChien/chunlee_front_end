@@ -10,8 +10,14 @@ import {
 	Button,
 	Loading,
 } from "@/components/admin";
-import type { AdminCourseFormData, AdminCourse } from "@/lib/interfaces";
+import type {
+	AdminCourseEditFormData,
+	AdminCourse,
+	ExteriorListData,
+	CategoryOptions,
+} from "@/lib/interfaces";
 import { IoArrowBack, IoSave } from "react-icons/io5";
+import { fecthcPubilcData } from "@/lib/hooks";
 
 export default function EditCoursePage() {
 	const router = useRouter();
@@ -21,11 +27,11 @@ export default function EditCoursePage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errors, setErrors] = useState<Record<string, string>>({});
-
-	const [formData, setFormData] = useState<AdminCourseFormData>({
+	const [categoryOptions, setCategoryOptions] = useState<CategoryOptions[]>([]);
+	const [formData, setFormData] = useState<AdminCourseEditFormData>({
+		id: "",
 		code: "",
 		title: "",
-		categoryId: 0,
 		startAt: "",
 		endAt: "",
 		trainingHours: 0,
@@ -42,9 +48,9 @@ export default function EditCoursePage() {
 			if (response.data.success) {
 				const course: AdminCourse = response.data.data;
 				setFormData({
+					id: course.id.toString(),
 					code: course.code,
 					title: course.title,
-					categoryId: course.categoryId,
 					startAt: course.startAt.split("T")[0],
 					endAt: course.endAt.split("T")[0],
 					trainingHours: course.trainingHours,
@@ -60,13 +66,11 @@ export default function EditCoursePage() {
 				id: Number(courseId),
 				code: "COURSE-0001",
 				title: "測試課程",
-				category: "台中班(零售業)",
-				categoryId: 1,
 				startAt: "2025-01-15",
 				endAt: "2025-01-17",
 				trainingHours: 18,
 				fee: 5000,
-				location: "台中市",
+				location: "KAOHSIUNG",
 				status: "published",
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
@@ -74,7 +78,6 @@ export default function EditCoursePage() {
 			setFormData({
 				code: mockCourse.code,
 				title: mockCourse.title,
-				categoryId: mockCourse.categoryId,
 				startAt: mockCourse.startAt,
 				endAt: mockCourse.endAt,
 				trainingHours: mockCourse.trainingHours,
@@ -87,8 +90,24 @@ export default function EditCoursePage() {
 		}
 	};
 
+	// 分類選項 (從 API 獲取)
+	const fetchCategoryOptions = async () => {
+		const res = await fecthcPubilcData<ExteriorListData>(
+			"/training/exterior/categories"
+		);
+
+		// 變成符合 Select 的 options 格式
+		const option: CategoryOptions[] = res.data.map((item) => ({
+			label: item.name,
+			value: item.code,
+		}));
+
+		setCategoryOptions(option);
+	};
+
 	// 載入課程資料
 	useEffect(() => {
+		fetchCategoryOptions();
 		fetchCourse();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [courseId]);
@@ -105,8 +124,8 @@ export default function EditCoursePage() {
 			newErrors.title = "請輸入課程名稱";
 		}
 
-		if (formData.categoryId === 0) {
-			newErrors.categoryId = "請選擇課程分類";
+		if (!formData.location.trim()) {
+			newErrors.location = "請選擇課程分類";
 		}
 
 		if (!formData.startAt) {
@@ -131,10 +150,6 @@ export default function EditCoursePage() {
 
 		if (formData.fee < 0) {
 			newErrors.fee = "費用不能為負數";
-		}
-
-		if (!formData.location.trim()) {
-			newErrors.location = "請輸入上課地點";
 		}
 
 		setErrors(newErrors);
@@ -169,7 +184,7 @@ export default function EditCoursePage() {
 
 	// 更新表單欄位
 	const updateField = (
-		field: keyof AdminCourseFormData,
+		field: keyof AdminCourseEditFormData,
 		value: string | number
 	) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
@@ -182,17 +197,6 @@ export default function EditCoursePage() {
 			});
 		}
 	};
-
-	// 分類選項
-	const categoryOptions = [
-		{ value: 0, label: "請選擇分類", disabled: true },
-		{ value: 1, label: "台中班(零售業)" },
-		{ value: 2, label: "台中班(工)" },
-		{ value: 3, label: "台中班(服務業)" },
-		{ value: 4, label: "桃園班" },
-		{ value: 5, label: "台南班" },
-		{ value: 6, label: "高雄班" },
-	];
 
 	const statusOptions = [
 		{ value: "draft", label: "草稿" },
@@ -258,14 +262,16 @@ export default function EditCoursePage() {
 					/>
 
 					{/* 課程分類 */}
-					<Select
-						label='課程分類'
-						options={categoryOptions}
-						value={formData.categoryId}
-						onChange={(e) => updateField("categoryId", Number(e.target.value))}
-						error={errors.categoryId}
-						required
-					/>
+					{categoryOptions && (
+						<Select
+							label='課程分類'
+							options={categoryOptions}
+							value={formData.location}
+							onChange={(e) => updateField("location", e.target.value)}
+							error={errors.categoryId}
+							required
+						/>
+					)}
 
 					{/* 課程名稱 */}
 					<div className='md:col-span-2'>
@@ -322,16 +328,6 @@ export default function EditCoursePage() {
 						onChange={(e) => updateField("fee", Number(e.target.value))}
 						error={errors.fee}
 						helperText='單位: 新台幣'
-						required
-					/>
-
-					{/* 上課地點 */}
-					<Input
-						label='上課地點'
-						placeholder='請輸入上課地點'
-						value={formData.location}
-						onChange={(e) => updateField("location", e.target.value)}
-						error={errors.location}
 						required
 					/>
 
