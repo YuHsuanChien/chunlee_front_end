@@ -5,7 +5,16 @@ import { useRouter } from "next/navigation";
 import axios from "@/lib/axios/axios";
 import { FormWrapper, Input, Select, Button } from "@/components/admin";
 import type { AdminCourseFormData } from "@/lib/interfaces";
-import { IoArrowBack, IoSave, IoAddCircle, IoTrash } from "react-icons/io5";
+import {
+	IoArrowBack,
+	IoSave,
+	IoAddCircle,
+	IoTrash,
+	IoCloudUpload,
+	IoDocument,
+	IoDownload,
+	IoClose,
+} from "react-icons/io5";
 import { fecthcPubilcData } from "@/lib/hooks";
 import { ExteriorListData } from "@/lib/interfaces";
 import { v4 as uuidv4 } from "uuid";
@@ -20,6 +29,8 @@ export default function CreateCoursePage() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [categoryOptions, setCategoryOptions] = useState<SelectOption[]>([]);
 	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [isUploading, setIsUploading] = useState(false);
+	const [uploadedFileName, setUploadedFileName] = useState<string>("");
 
 	const [formData, setFormData] = useState<AdminCourseFormData>({
 		code: "",
@@ -29,6 +40,7 @@ export default function CreateCoursePage() {
 		trainingHours: 0,
 		fee: 0,
 		status: "draft",
+		filePath: "",
 	});
 
 	// 新增日期組
@@ -124,6 +136,61 @@ export default function CreateCoursePage() {
 		return Object.keys(newErrors).length === 0;
 	};
 
+	// 處理檔案上傳
+	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		// 驗證檔案類型 (允許 PDF 和 Word)
+		const allowedTypes = [
+			"application/pdf",
+			"application/msword",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		];
+		if (!allowedTypes.includes(file.type)) {
+			alert("只允許上傳 PDF 或 Word 檔案 (.pdf, .doc, .docx)");
+			return;
+		}
+
+		// 驗證檔案大小 (10MB)
+		if (file.size > 10 * 1024 * 1024) {
+			alert("檔案大小不能超過 10MB");
+			return;
+		}
+
+		try {
+			setIsUploading(true);
+			const uploadFormData = new FormData();
+			uploadFormData.append("file", file);
+
+			const response = await fetch("/api/upload", {
+				method: "POST",
+				body: uploadFormData,
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				setFormData((prev) => ({ ...prev, filePath: result.filePath }));
+				setUploadedFileName(file.name);
+				alert("檔案上傳成功!");
+			} else {
+				alert(result.error || "檔案上傳失敗");
+			}
+		} catch (error) {
+			console.error("檔案上傳錯誤:", error);
+			alert("檔案上傳失敗,請稍後再試");
+		} finally {
+			setIsUploading(false);
+		}
+	};
+
+	// 移除已上傳的檔案
+	const handleRemoveFile = () => {
+		setFormData((prev) => ({ ...prev, filePath: "" }));
+		setUploadedFileName("");
+	};
+
 	// 提交表單
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -145,6 +212,7 @@ export default function CreateCoursePage() {
 				trainingHours: formData.trainingHours,
 				fee: formData.fee,
 				status: formData.status,
+				filePath: formData.filePath, // 加入檔案路徑
 			}));
 
 			// 批次新增課程
@@ -375,6 +443,79 @@ export default function CreateCoursePage() {
 						helperText='草稿不會顯示在前台'
 						required
 					/>
+
+					{/* 課程簡章上傳 */}
+					<div className='md:col-span-2'>
+						<label className='block text-sm font-medium text-gray-700 mb-2'>
+							課程簡章 (PDF / Word)
+						</label>
+
+						{!formData.filePath ? (
+							<div className='flex items-center justify-center w-full'>
+								<label className='flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors'>
+									<div className='flex flex-col items-center justify-center pt-5 pb-6'>
+										<IoCloudUpload className='w-10 h-10 mb-3 text-gray-400' />
+										<p className='mb-2 text-sm text-gray-500'>
+											<span className='font-semibold'>點擊上傳檔案</span>
+										</p>
+										<p className='text-xs text-gray-500'>
+											支援 PDF 或 Word 檔案 (最大 10MB)
+										</p>
+									</div>
+									<input
+										type='file'
+										className='hidden'
+										accept='application/pdf,.pdf,application/msword,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx'
+										onChange={handleFileUpload}
+										disabled={isUploading}
+									/>
+								</label>
+							</div>
+						) : (
+							<div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200'>
+								<div className='flex items-center gap-3'>
+									<IoDocument
+										className={`w-6 h-6 ${
+											formData.filePath?.endsWith(".pdf")
+												? "text-red-500"
+												: "text-blue-500"
+										}`}
+									/>
+									<div>
+										<p className='text-sm font-medium text-gray-900'>
+											{uploadedFileName || "已上傳檔案"}
+										</p>
+										<p className='text-xs text-gray-500'>
+											{formData.filePath?.endsWith(".pdf")
+												? "PDF 文件"
+												: "Word 文件"}
+										</p>
+									</div>
+								</div>
+								<div className='flex items-center gap-2'>
+									<a
+										href={formData.filePath}
+										target='_blank'
+										rel='noopener noreferrer'
+										className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
+										title='預覽/下載'>
+										<IoDownload className='w-5 h-5' />
+									</a>
+									<button
+										type='button'
+										onClick={handleRemoveFile}
+										className='p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+										title='移除檔案'>
+										<IoClose className='w-5 h-5' />
+									</button>
+								</div>
+							</div>
+						)}
+
+						{isUploading && (
+							<p className='mt-2 text-sm text-blue-600'>檔案上傳中...</p>
+						)}
+					</div>
 				</div>
 			</FormWrapper>
 		</div>

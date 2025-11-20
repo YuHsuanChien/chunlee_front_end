@@ -16,7 +16,14 @@ import type {
 	ExteriorListData,
 	CategoryOptions,
 } from "@/lib/interfaces";
-import { IoArrowBack, IoSave } from "react-icons/io5";
+import {
+	IoArrowBack,
+	IoSave,
+	IoCloudUpload,
+	IoDocument,
+	IoDownload,
+	IoClose,
+} from "react-icons/io5";
 import { fecthcPubilcData } from "@/lib/hooks";
 
 export default function EditCoursePage() {
@@ -28,6 +35,10 @@ export default function EditCoursePage() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [categoryOptions, setCategoryOptions] = useState<CategoryOptions[]>([]);
+	const [isUploading, setIsUploading] = useState(false);
+	const [uploadedFileName, setUploadedFileName] = useState<string>("");
+	const [originalFilePath, setOriginalFilePath] = useState<string>("");
+
 	const [formData, setFormData] = useState<AdminCourseEditFormData>({
 		id: "",
 		code: "",
@@ -38,13 +49,19 @@ export default function EditCoursePage() {
 		fee: 0,
 		location: "",
 		status: "draft",
+		filePath: "",
 	});
 
+	/**
+	 * 獲取課程資料
+	 * 優先從 sessionStorage 讀取快取（避免重複 API 請求）
+	 * 快取有效期：5 分鐘
+	 */
 	const fetchCourse = async () => {
 		try {
 			setIsLoading(true);
 
-			// 優先從 sessionStorage 讀取資料
+			// 1. 嘗試從 sessionStorage 讀取快取資料
 			const cacheKey = `course_edit_${courseId}`;
 			const cachedData = sessionStorage.getItem(cacheKey);
 
@@ -54,10 +71,12 @@ export default function EditCoursePage() {
 					const course: AdminCourse = cacheObject.data;
 					const timestamp = cacheObject.timestamp;
 
-					// 檢查快取是否在 5 分鐘內(避免使用過期資料)
+					// 檢查快取是否在 5 分鐘內（避免使用過期資料）
 					const isValid = Date.now() - timestamp < 5 * 60 * 1000;
 
 					if (isValid) {
+						// 使用快取資料，無需呼叫 API
+						const filePath = course.filePath || "";
 						setFormData({
 							id: course.id.toString(),
 							code: course.code,
@@ -68,17 +87,46 @@ export default function EditCoursePage() {
 							fee: course.fee,
 							location: course.location,
 							status: course.status,
+							filePath: filePath,
 						});
-						// 清除快取資料
-						sessionStorage.removeItem(cacheKey);
+
+						setOriginalFilePath(filePath);
+						if (filePath) {
+							setUploadedFileName(filePath.split("/").pop() || "");
+						}
 						setIsLoading(false);
 						return;
 					}
+					// 快取已過期，繼續執行 API 請求
 				} catch (error) {
 					console.error("解析快取資料失敗:", error);
+					// 解析失敗則清除無效快取
+					sessionStorage.removeItem(cacheKey);
 				}
-				// 如果快取無效或解析失敗,清除它
-				sessionStorage.removeItem(cacheKey);
+			}
+
+			// 2. 從 API 獲取課程資料（無快取或快取過期時）
+			const response = await axios.get(`/admin/courses/${courseId}`);
+
+			if (response.data.success) {
+				const course: AdminCourse = response.data.data;
+				const filePath = course.filePath || "";
+				setFormData({
+					id: course.id.toString(),
+					code: course.code,
+					title: course.title,
+					startAt: course.startAt.split("T")[0],
+					endAt: course.endAt.split("T")[0],
+					trainingHours: course.trainingHours,
+					fee: course.fee,
+					location: course.location,
+					status: course.status,
+					filePath: filePath,
+				});
+				setOriginalFilePath(filePath);
+				if (filePath) {
+					setUploadedFileName(filePath.split("/").pop() || "");
+				}
 			}
 		} catch (error) {
 			console.error("載入課程失敗:", error);
@@ -96,6 +144,7 @@ export default function EditCoursePage() {
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
+			const filePath = mockCourse.filePath || "";
 			setFormData({
 				code: mockCourse.code,
 				title: mockCourse.title,
@@ -105,13 +154,20 @@ export default function EditCoursePage() {
 				fee: mockCourse.fee,
 				location: mockCourse.location,
 				status: mockCourse.status,
+				filePath: filePath,
 			});
+			setOriginalFilePath(filePath);
+			if (filePath) {
+				setUploadedFileName(filePath.split("/").pop() || "");
+			}
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	// 分類選項 (從 API 獲取)
+	/**
+	 * 獲取課程分類選項
+	 */
 	const fetchCategoryOptions = async () => {
 		const res = await fecthcPubilcData<ExteriorListData>(
 			"/training/exterior/categories"
@@ -126,20 +182,20 @@ export default function EditCoursePage() {
 		setCategoryOptions(option);
 	};
 
-	// 載入課程資料
+	/**
+	 * 組件初始化：載入課程資料和分類選項
+	 * 注意：sessionStorage 的生命週期由瀏覽器管理（tab 關閉時自動清除）
+	 * React Strict Mode 會觸發兩次執行，但因快取機制不會重複呼叫 API
+	 */
 	useEffect(() => {
 		fetchCategoryOptions();
 		fetchCourse();
-
-		// 清理函數: 當組件卸載時,清除可能殘留的快取
-		return () => {
-			const cacheKey = `course_edit_${courseId}`;
-			sessionStorage.removeItem(cacheKey);
-		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [courseId]);
 
-	// 表單驗證
+	/**
+	 * 表單驗證
+	 */
 	const validateForm = (): boolean => {
 		const newErrors: Record<string, string> = {};
 
@@ -183,7 +239,71 @@ export default function EditCoursePage() {
 		return Object.keys(newErrors).length === 0;
 	};
 
-	// 提交表單
+	/**
+	 * 處理檔案上傳
+	 * 支援格式：PDF, Word (.doc, .docx)
+	 * 大小限制：10MB
+	 */
+	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		// 驗證檔案類型 (允許 PDF 和 Word)
+		const allowedTypes = [
+			"application/pdf",
+			"application/msword",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		];
+		if (!allowedTypes.includes(file.type)) {
+			alert("只允許上傳 PDF 或 Word 檔案 (.pdf, .doc, .docx)");
+			return;
+		}
+
+		// 驗證檔案大小 (10MB)
+		if (file.size > 10 * 1024 * 1024) {
+			alert("檔案大小不能超過 10MB");
+			return;
+		}
+
+		try {
+			setIsUploading(true);
+			const uploadFormData = new FormData();
+			uploadFormData.append("file", file);
+
+			const response = await fetch("/api/upload", {
+				method: "POST",
+				body: uploadFormData,
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				setFormData((prev) => ({ ...prev, filePath: result.filePath }));
+				setUploadedFileName(file.name);
+				alert("檔案上傳成功!");
+			} else {
+				alert(result.error || "檔案上傳失敗");
+			}
+		} catch (error) {
+			console.error("檔案上傳錯誤:", error);
+			alert("檔案上傳失敗,請稍後再試");
+		} finally {
+			setIsUploading(false);
+		}
+	};
+
+	/**
+	 * 移除已上傳的檔案
+	 */
+	const handleRemoveFile = () => {
+		setFormData((prev) => ({ ...prev, filePath: "" }));
+		setUploadedFileName("");
+	};
+
+	/**
+	 * 提交表單更新課程
+	 * 注意：id 欄位不需要提交（後端從 URL 路徑取得）
+	 */
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
@@ -216,7 +336,10 @@ export default function EditCoursePage() {
 		}
 	};
 
-	// 更新表單欄位
+	/**
+	 * 更新表單欄位值
+	 * 同時清除該欄位的錯誤訊息
+	 */
 	const updateField = (
 		field: keyof AdminCourseEditFormData,
 		value: string | number
@@ -374,6 +497,106 @@ export default function EditCoursePage() {
 						helperText='草稿不會顯示在前台'
 						required
 					/>
+
+					{/* 課程簡章管理 */}
+					<div className='md:col-span-2'>
+						<label className='block text-sm font-medium text-gray-700 mb-2'>
+							課程簡章 (PDF / Word)
+							{originalFilePath && formData.filePath === originalFilePath && (
+								<span className='ml-2 text-xs text-gray-500'>
+									(目前使用原檔案)
+								</span>
+							)}
+							{originalFilePath && formData.filePath !== originalFilePath && (
+								<span className='ml-2 text-xs text-green-600'>
+									(已更換新檔案)
+								</span>
+							)}
+						</label>
+
+						{!formData.filePath ? (
+							<div className='flex items-center justify-center w-full'>
+								<label className='flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors'>
+									<div className='flex flex-col items-center justify-center pt-5 pb-6'>
+										<IoCloudUpload className='w-10 h-10 mb-3 text-gray-400' />
+										<p className='mb-2 text-sm text-gray-500'>
+											<span className='font-semibold'>點擊上傳檔案</span>
+										</p>
+										<p className='text-xs text-gray-500'>
+											支援 PDF 或 Word 檔案 (最大 10MB)
+										</p>
+									</div>
+									<input
+										type='file'
+										className='hidden'
+										accept='application/pdf,.pdf,application/msword,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx'
+										onChange={handleFileUpload}
+										disabled={isUploading}
+									/>
+								</label>
+							</div>
+						) : (
+							<div className='space-y-3'>
+								<div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200'>
+									<div className='flex items-center gap-3'>
+										<IoDocument
+											className={`w-6 h-6 ${
+												formData.filePath?.endsWith(".pdf")
+													? "text-red-500"
+													: "text-blue-500"
+											}`}
+										/>
+										<div>
+											<p className='text-sm font-medium text-gray-900'>
+												{uploadedFileName ||
+													formData.filePath.split("/").pop() ||
+													"已上傳檔案"}
+											</p>
+											<p className='text-xs text-gray-500'>
+												{formData.filePath?.endsWith(".pdf")
+													? "PDF 文件"
+													: "Word 文件"}
+											</p>
+										</div>
+									</div>
+									<div className='flex items-center gap-2'>
+										<a
+											href={formData.filePath}
+											target='_blank'
+											rel='noopener noreferrer'
+											className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
+											title='預覽/下載'>
+											<IoDownload className='w-5 h-5' />
+										</a>
+										<button
+											type='button'
+											onClick={handleRemoveFile}
+											className='p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+											title='移除檔案'>
+											<IoClose className='w-5 h-5' />
+										</button>
+									</div>
+								</div>
+
+								{/* 重新上傳按鈕 */}
+								<label className='flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors'>
+									<IoCloudUpload className='w-4 h-4' />
+									<span>重新上傳檔案</span>
+									<input
+										type='file'
+										className='hidden'
+										accept='application/pdf,.pdf,application/msword,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx'
+										onChange={handleFileUpload}
+										disabled={isUploading}
+									/>
+								</label>
+							</div>
+						)}
+
+						{isUploading && (
+							<p className='mt-2 text-sm text-blue-600'>檔案上傳中...</p>
+						)}
+					</div>
 				</div>
 			</FormWrapper>
 		</div>

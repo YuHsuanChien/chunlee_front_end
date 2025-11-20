@@ -63,6 +63,7 @@ export interface AdminCourse {
 	fee: number;
 	location: string;
 	status: "draft" | "published" | "archived";
+	filePath?: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -81,6 +82,7 @@ export interface AdminCourseFormData {
 	fee: number;
 	location: string;
 	status: "draft" | "published" | "archived";
+	filePath?: string;
 }
 
 // 編輯課程用的表單資料 (單一日期)
@@ -94,6 +96,7 @@ export interface AdminCourseEditFormData {
 	fee: number;
 	location: string;
 	status: "draft" | "published" | "archived";
+	filePath?: string;
 }
 
 export interface AdminCoursesResponse {

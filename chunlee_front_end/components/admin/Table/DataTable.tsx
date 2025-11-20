@@ -132,7 +132,7 @@ export function DataTable<T>({
 						onClick={() => onRowClick?.(item, index)}>
 						{columns.map((column) => (
 							<div key={column.key} className='flex justify-between py-2'>
-								<span className='font-medium text-gray-600 dark:text-gray-400'>
+								<span className='font-medium text-gray-600 dark:text-gray-400 min-w-20'>
 									{column.label}:
 								</span>
 								<span className='text-gray-900 dark:text-gray-300'>

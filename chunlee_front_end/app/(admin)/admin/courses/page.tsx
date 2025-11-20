@@ -12,7 +12,7 @@ import {
 	Input,
 } from "@/components/admin";
 import type { Column } from "@/components/admin";
-import type { AdminCourse } from "@/lib/interfaces";
+import type { AdminCourse, ExteriorListData } from "@/lib/interfaces";
 import {
 	IoAdd,
 	IoSearch,
@@ -21,11 +21,18 @@ import {
 	IoEye,
 	IoFilter,
 } from "react-icons/io5";
+import { fecthcPubilcData } from "@/lib/hooks";
+
+interface SelectOption {
+	value: string | number;
+	label: string;
+}
 
 export default function CoursesPage() {
 	const router = useRouter();
 	const [courses, setCourses] = useState<AdminCourse[]>([]);
 	const [filteredCourses, setFilteredCourses] = useState<AdminCourse[]>([]);
+	const [categoryOptions, setCategoryOptions] = useState<SelectOption[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [searchKeyword, setSearchKeyword] = useState("");
@@ -41,6 +48,7 @@ export default function CoursesPage() {
 	// 載入課程資料
 	useEffect(() => {
 		fetchCourses();
+		fetchCategoryOptions();
 	}, []);
 
 	// 過濾和搜尋
@@ -71,7 +79,7 @@ export default function CoursesPage() {
 		try {
 			setIsLoading(true);
 			// 這裡改成您的實際 API 端點
-			const response = await axios.get("/admin/courses");
+			const response = await axios.get("/training/exterior/courses");
 
 			if (response.data.success) {
 				setCourses(response.data.data);
@@ -133,6 +141,22 @@ export default function CoursesPage() {
 		);
 	};
 
+	// 取得分類名稱
+	// 分類選項 (從 API 獲取)
+	const fetchCategoryOptions = async () => {
+		const res = await fecthcPubilcData<ExteriorListData>(
+			"/training/exterior/categories"
+		);
+
+		// 變成符合 Select 的 options 格式
+		const option = res.data.map((item) => ({
+			label: item.name,
+			value: item.code,
+		}));
+
+		setCategoryOptions(option);
+	};
+
 	// 表格欄位定義
 	const columns: Column<AdminCourse>[] = [
 		{
@@ -146,8 +170,14 @@ export default function CoursesPage() {
 			className: "min-w-[200px]",
 		},
 		{
-			key: "category",
+			key: "location",
 			label: "分類",
+			render: (course) => {
+				const category = categoryOptions.find(
+					(option) => option.value === course.location
+				);
+				return category ? category.label : course.location;
+			},
 		},
 		{
 			key: "startAt",
@@ -182,7 +212,11 @@ export default function CoursesPage() {
 					</button>
 					<button
 						onClick={() => {
-							// 將課程資料暫存到 sessionStorage (加上時間戳)
+							/**
+							 * 將課程資料暫存到 sessionStorage
+							 * 避免編輯頁面重複呼叫 API
+							 * 快取有效期：5 分鐘（在編輯頁面檢查）
+							 */
 							const cacheKey = `course_edit_${course.id}`;
 							const cacheData = {
 								data: course,
