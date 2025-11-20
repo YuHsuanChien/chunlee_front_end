@@ -59,7 +59,6 @@ export default function CoursesPage() {
 				(course) =>
 					course.title.toLowerCase().includes(keyword) ||
 					course.code.toLowerCase().includes(keyword) ||
-					course.category.toLowerCase().includes(keyword) ||
 					course.location.toLowerCase().includes(keyword)
 			);
 		}
@@ -182,7 +181,16 @@ export default function CoursesPage() {
 						<IoEye className='w-5 h-5' />
 					</button>
 					<button
-						onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
+						onClick={() => {
+							// 將課程資料暫存到 sessionStorage (加上時間戳)
+							const cacheKey = `course_edit_${course.id}`;
+							const cacheData = {
+								data: course,
+								timestamp: Date.now(),
+							};
+							sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+							router.push(`/admin/courses/${course.id}/edit`);
+						}}
 						className='p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors'
 						title='編輯'>
 						<IoCreate className='w-5 h-5' />

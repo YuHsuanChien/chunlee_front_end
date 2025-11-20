@@ -43,21 +43,42 @@ export default function EditCoursePage() {
 	const fetchCourse = async () => {
 		try {
 			setIsLoading(true);
-			const response = await axios.get(`/admin/courses/${courseId}`);
 
-			if (response.data.success) {
-				const course: AdminCourse = response.data.data;
-				setFormData({
-					id: course.id.toString(),
-					code: course.code,
-					title: course.title,
-					startAt: course.startAt.split("T")[0],
-					endAt: course.endAt.split("T")[0],
-					trainingHours: course.trainingHours,
-					fee: course.fee,
-					location: course.location,
-					status: course.status,
-				});
+			// 優先從 sessionStorage 讀取資料
+			const cacheKey = `course_edit_${courseId}`;
+			const cachedData = sessionStorage.getItem(cacheKey);
+
+			if (cachedData) {
+				try {
+					const cacheObject = JSON.parse(cachedData);
+					const course: AdminCourse = cacheObject.data;
+					const timestamp = cacheObject.timestamp;
+
+					// 檢查快取是否在 5 分鐘內(避免使用過期資料)
+					const isValid = Date.now() - timestamp < 5 * 60 * 1000;
+
+					if (isValid) {
+						setFormData({
+							id: course.id.toString(),
+							code: course.code,
+							title: course.title,
+							startAt: course.startAt.split("T")[0],
+							endAt: course.endAt.split("T")[0],
+							trainingHours: course.trainingHours,
+							fee: course.fee,
+							location: course.location,
+							status: course.status,
+						});
+						// 清除快取資料
+						sessionStorage.removeItem(cacheKey);
+						setIsLoading(false);
+						return;
+					}
+				} catch (error) {
+					console.error("解析快取資料失敗:", error);
+				}
+				// 如果快取無效或解析失敗,清除它
+				sessionStorage.removeItem(cacheKey);
 			}
 		} catch (error) {
 			console.error("載入課程失敗:", error);
@@ -109,6 +130,12 @@ export default function EditCoursePage() {
 	useEffect(() => {
 		fetchCategoryOptions();
 		fetchCourse();
+
+		// 清理函數: 當組件卸載時,清除可能殘留的快取
+		return () => {
+			const cacheKey = `course_edit_${courseId}`;
+			sessionStorage.removeItem(cacheKey);
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [courseId]);
 
@@ -167,8 +194,15 @@ export default function EditCoursePage() {
 		try {
 			setIsSubmitting(true);
 
+			// 準備提交資料 (移除 id,因為後端會從 URL 路徑取得)
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { id, ...dataToSubmit } = formData;
+
 			// 呼叫 API 更新課程
-			const response = await axios.put(`/admin/courses/${courseId}`, formData);
+			const response = await axios.put(
+				`/admin/courses/${courseId}`,
+				dataToSubmit
+			);
 
 			if (response.data.success) {
 				alert("課程更新成功!");

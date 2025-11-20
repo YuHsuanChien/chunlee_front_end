@@ -137,7 +137,6 @@ export default function CreateCoursePage() {
 
 			// 將表單資料轉換成多個課程物件 (依據 dates 陣列)
 			const coursesToCreate = formData.dates.map((date) => ({
-				id: uuidv4(),
 				code: formData.code,
 				title: formData.title,
 				location: formData.location,
@@ -149,9 +148,10 @@ export default function CreateCoursePage() {
 			}));
 
 			// 批次新增課程
-			const response = await axios.post("/admin/courses/batch", {
-				courses: coursesToCreate,
-			});
+			const response = await axios.post(
+				"/admin/courses/batch",
+				coursesToCreate
+			);
 
 			if (response.data.success) {
 				alert(`成功新增 ${coursesToCreate.length} 個課程!`);
