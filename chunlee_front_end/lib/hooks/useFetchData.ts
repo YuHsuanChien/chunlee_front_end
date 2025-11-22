@@ -1,7 +1,7 @@
 export async function fecthcPubilcData<T>(filename: string): Promise<T> {
 	const pubilcUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 	const res = await fetch(`${pubilcUrl}${filename}`, {
-		cache: "force-cache", // 使用 Next.js 的靜態生成緩存
+		next: { revalidate: 60 }, // 每 60 秒重新驗證一次資料
 	});
 
 	if (!res.ok) {

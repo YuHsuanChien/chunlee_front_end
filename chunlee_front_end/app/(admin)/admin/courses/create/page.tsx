@@ -217,7 +217,7 @@ export default function CreateCoursePage() {
 
 			// 批次新增課程
 			const response = await axios.post(
-				"/admin/courses/batch",
+				"/training/exterior/courses",
 				coursesToCreate
 			);
 

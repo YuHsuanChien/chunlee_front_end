@@ -13,14 +13,7 @@ import {
 } from "@/components/admin";
 import type { Column } from "@/components/admin";
 import type { AdminCourse, ExteriorListData } from "@/lib/interfaces";
-import {
-	IoAdd,
-	IoSearch,
-	IoCreate,
-	IoTrash,
-	IoEye,
-	IoFilter,
-} from "react-icons/io5";
+import { IoAdd, IoSearch, IoCreate, IoTrash, IoFilter } from "react-icons/io5";
 import { fecthcPubilcData } from "@/lib/hooks";
 
 interface SelectOption {
@@ -37,6 +30,7 @@ export default function CoursesPage() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [searchKeyword, setSearchKeyword] = useState("");
 	const [statusFilter, setStatusFilter] = useState<string>("all");
+	const [dateSort, setDateSort] = useState<"asc" | "desc">("asc"); // 日期排序狀態：預設由近到遠
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [courseToDelete, setCourseToDelete] = useState<AdminCourse | null>(
 		null
@@ -71,9 +65,16 @@ export default function CoursesPage() {
 			);
 		}
 
+		// 日期排序（預設由近到遠）
+		filtered.sort((a, b) => {
+			const dateA = new Date(a.startAt).getTime();
+			const dateB = new Date(b.startAt).getTime();
+			return dateSort === "asc" ? dateA - dateB : dateB - dateA;
+		});
+
 		setFilteredCourses(filtered);
 		setCurrentPage(1); // 重置到第一頁
-	}, [searchKeyword, statusFilter, courses]);
+	}, [searchKeyword, statusFilter, dateSort, courses]);
 
 	const fetchCourses = async () => {
 		try {
@@ -102,7 +103,7 @@ export default function CoursesPage() {
 
 		try {
 			setIsDeleting(true);
-			await axios.delete(`/admin/courses/${courseToDelete.id}`);
+			await axios.delete(`/training/exterior/courses/${courseToDelete.id}`);
 
 			// 更新列表
 			setCourses((prev) =>
@@ -117,6 +118,14 @@ export default function CoursesPage() {
 		} finally {
 			setIsDeleting(false);
 		}
+	};
+
+	/**
+	 * 處理日期排序切換
+	 * asc (由近到遠) ⇄ desc (由遠到近)
+	 */
+	const handleDateSort = () => {
+		setDateSort((prev) => (prev === "asc" ? "desc" : "asc"));
 	};
 
 	// 狀態徽章樣式
@@ -181,7 +190,43 @@ export default function CoursesPage() {
 		},
 		{
 			key: "startAt",
-			label: "開課日期",
+			label: (
+				<div className='flex items-center gap-2'>
+					<span>開課日期</span>
+					<button
+						onClick={handleDateSort}
+						className='p-1 hover:bg-gray-100 rounded transition-colors'
+						title={dateSort === "asc" ? "目前：由近到遠" : "目前：由遠到近"}>
+						{dateSort === "asc" ? (
+							<svg
+								className='w-4 h-4 text-blue-600'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M5 15l7-7 7 7'
+								/>
+							</svg>
+						) : (
+							<svg
+								className='w-4 h-4 text-blue-600'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M19 9l-7 7-7-7'
+								/>
+							</svg>
+						)}
+					</button>
+				</div>
+			),
 			render: (course) => new Date(course.startAt).toLocaleDateString("zh-TW"),
 		},
 		{
@@ -204,12 +249,6 @@ export default function CoursesPage() {
 			label: "操作",
 			render: (course) => (
 				<div className='flex items-center gap-2'>
-					<button
-						onClick={() => router.push(`/admin/courses/${course.id}`)}
-						className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-						title='查看詳情'>
-						<IoEye className='w-5 h-5' />
-					</button>
 					<button
 						onClick={() => {
 							/**

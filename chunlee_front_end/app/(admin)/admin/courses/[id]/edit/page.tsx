@@ -320,7 +320,7 @@ export default function EditCoursePage() {
 
 			// 呼叫 API 更新課程
 			const response = await axios.put(
-				`/admin/courses/${courseId}`,
+				`/training/exterior/courses/${courseId}`,
 				dataToSubmit
 			);
 

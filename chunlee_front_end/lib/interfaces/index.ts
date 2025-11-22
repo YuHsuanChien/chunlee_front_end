@@ -24,17 +24,26 @@ export interface ExteriorListItemData {
 	name: string;
 }
 
+// 公開課程資料 API 回應
+export interface ExteriorCourseData {
+	success: boolean;
+	data: ExteriorCourseItem[];
+}
+
 // 公開課程卡片資料
 export interface ExteriorCourseItem {
 	id: number;
 	code: string;
+	createdAt: string;
 	title: string;
-	loction: string;
+	location: string;
 	startAt: Date | string;
 	endAt: Date | string;
 	trainingHours: string;
 	fee: number | string;
 	filePath: string;
+	status: "draft" | "published" | "archived";
+	updatedAt: string;
 }
 
 export interface InteriorListProps {

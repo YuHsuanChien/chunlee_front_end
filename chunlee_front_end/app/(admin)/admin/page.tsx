@@ -1,10 +1,87 @@
 "use client";
 
 import { useAuth } from "../../../lib/axios/providers/AuthProvider";
+import { useState, useEffect } from "react";
+import packageJson from "../../../package.json";
+
+// 技術棧配置
+const techStack = [
+	{
+		name: "Next.js",
+		version: packageJson.dependencies.next,
+		icon: "⚡",
+		color: "bg-gray-900 text-white",
+	},
+	{
+		name: "React",
+		version: packageJson.dependencies.react,
+		icon: "⚛️",
+		color: "bg-blue-500 text-white",
+	},
+	{
+		name: "TypeScript",
+		version: packageJson.devDependencies.typescript,
+		icon: "📘",
+		color: "bg-blue-600 text-white",
+	},
+	{
+		name: "Tailwind CSS",
+		version: packageJson.devDependencies.tailwindcss,
+		icon: "🎨",
+		color: "bg-cyan-500 text-white",
+	},
+	{
+		name: "Axios",
+		version: packageJson.dependencies.axios,
+		icon: "🌐",
+		color: "bg-purple-500 text-white",
+	},
+	{
+		name: "Zustand",
+		version: packageJson.dependencies.zustand,
+		icon: "🐻",
+		color: "bg-amber-600 text-white",
+	},
+	{
+		name: "React Icons",
+		version: packageJson.dependencies["react-icons"],
+		icon: "🎭",
+		color: "bg-pink-500 text-white",
+	},
+	{
+		name: "Swiper",
+		version: packageJson.dependencies.swiper,
+		icon: "📱",
+		color: "bg-indigo-500 text-white",
+	},
+];
 
 export default function AdminHome() {
 	const { user } = useAuth();
-	// console.log(user);
+	const [currentTime, setCurrentTime] = useState<string>("");
+
+	// 動態更新當前時間
+	useEffect(() => {
+		const updateTime = () => {
+			const now = new Date();
+			setCurrentTime(
+				now.toLocaleString("zh-TW", {
+					year: "numeric",
+					month: "2-digit",
+					day: "2-digit",
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+					hour12: false,
+				})
+			);
+		};
+
+		updateTime();
+		const timer = setInterval(updateTime, 1000);
+
+		return () => clearInterval(timer);
+	}, []);
 
 	return (
 		<div className='space-y-6'>
@@ -17,7 +94,7 @@ export default function AdminHome() {
 			</div>
 
 			{/* 統計卡片 */}
-			<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+			{/* <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
 				<div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
 					<div className='flex items-center'>
 						<div className='flex-shrink-0'>
@@ -92,10 +169,10 @@ export default function AdminHome() {
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> */}
 
 			{/* 快速操作 */}
-			<div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
+			{/* <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
 				<h2 className='text-lg font-semibold text-gray-900 mb-4'>快速操作</h2>
 				<div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
 					<button className='flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition'>
@@ -168,23 +245,102 @@ export default function AdminHome() {
 						<span className='text-sm font-medium text-gray-700'>數據分析</span>
 					</button>
 				</div>
-			</div>
+			</div> */}
 
 			{/* 系統資訊 */}
 			<div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
 				<h2 className='text-lg font-semibold text-gray-900 mb-4'>系統資訊</h2>
-				<div className='space-y-2 text-sm'>
-					<div className='flex justify-between'>
+				<div className='space-y-3 text-sm'>
+					<div className='flex flex-col sm:flex-row sm:justify-between gap-1'>
 						<span className='text-gray-600'>當前角色：</span>
 						<span className='font-medium text-gray-900'>{user?.role}</span>
 					</div>
-					<div className='flex justify-between'>
+					<div className='flex flex-col sm:flex-row sm:justify-between gap-1'>
 						<span className='text-gray-600'>帳號：</span>
 						<span className='font-medium text-gray-900'>{user?.account}</span>
 					</div>
-					<div className='flex justify-between'>
+					<div className='flex flex-col sm:flex-row sm:justify-between gap-1'>
 						<span className='text-gray-600'>系統版本：</span>
-						<span className='font-medium text-gray-900'>v1.0.0</span>
+						<span className='font-medium text-gray-900'>
+							v{packageJson.version}
+						</span>
+					</div>
+					<div className='flex flex-col sm:flex-row sm:justify-between gap-1'>
+						<span className='text-gray-600'>當前時間：</span>
+						<span className='font-medium text-gray-900 tabular-nums'>
+							{currentTime}
+						</span>
+					</div>
+				</div>
+			</div>
+
+			{/* 技術棧資訊 */}
+			<div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
+				<h2 className='text-lg font-semibold text-gray-900 mb-4'>
+					技術棧 & 套件版本
+				</h2>
+				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
+					{techStack.map((tech) => (
+						<div
+							key={tech.name}
+							className='flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow'>
+							<div
+								className={`shrink-0 w-10 h-10 ${tech.color} rounded-lg flex items-center justify-center text-lg`}>
+								{tech.icon}
+							</div>
+							<div className='flex-1 min-w-0'>
+								<p className='text-sm font-semibold text-gray-900 truncate'>
+									{tech.name}
+								</p>
+								<p className='text-xs text-gray-500 font-mono'>
+									v{tech.version.replace("^", "")}
+								</p>
+							</div>
+						</div>
+					))}
+				</div>
+
+				{/* 其他套件 */}
+				<div className='mt-6 pt-6 border-t border-gray-200'>
+					<h3 className='text-sm font-semibold text-gray-900 mb-3'>
+						其他開發工具
+					</h3>
+					<div className='flex flex-wrap gap-2'>
+						<span className='px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium'>
+							JWT v{packageJson.dependencies.jsonwebtoken.replace("^", "")}
+						</span>
+						<span className='px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium'>
+							UUID v{packageJson.dependencies.uuid.replace("^", "")}
+						</span>
+						<span className='px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium'>
+							ESLint v{packageJson.devDependencies.eslint.replace("^", "")}
+						</span>
+						<span className='px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium'>
+							PostCSS v
+							{packageJson.devDependencies["@tailwindcss/postcss"].replace(
+								"^",
+								""
+							)}
+						</span>
+					</div>
+				</div>
+
+				{/* 環境資訊 */}
+				<div className='mt-6 pt-6 border-t border-gray-200'>
+					<h3 className='text-sm font-semibold text-gray-900 mb-3'>執行環境</h3>
+					<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs'>
+						<div className='flex justify-between items-center p-3 bg-gray-50 rounded-lg'>
+							<span className='text-gray-600'>Node.js:</span>
+							<span className='font-mono text-gray-900'>
+								{typeof process !== "undefined" ? process.version : "N/A"}
+							</span>
+						</div>
+						<div className='flex justify-between items-center p-3 bg-gray-50 rounded-lg'>
+							<span className='text-gray-600'>Environment:</span>
+							<span className='font-mono text-gray-900'>
+								{process.env.NODE_ENV || "development"}
+							</span>
+						</div>
 					</div>
 				</div>
 			</div>

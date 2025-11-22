@@ -28,7 +28,9 @@ export const ExteriorList = ({
 			return courseData;
 		}
 		// 根據 code 過濾課程
-		return courseData.filter((course) => course.code === selectItem.code);
+		console.log("Selected Item Code:", selectItem.code);
+		console.log("courseData", courseData);
+		return courseData.filter((course) => course.location === selectItem.code);
 	}, [selectItem, courseData]);
 
 	// 根據關鍵字搜尋
@@ -199,14 +201,19 @@ export const ExteriorList = ({
 												</span>
 											</div>
 										</div>
-										<a
-											href={course.filePath}
-											target='_blank'
-											rel='noopener noreferrer'
-											className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-[#2b68b3] to-[#4a90e2] text-white rounded-lg hover:from-[#1f4d85] hover:to-[#2b68b3] transition-all duration-300 shadow-md hover:shadow-lg mt-3'>
-											<IoDownload className='text-lg' />
-											<span className='text-sm font-medium'>下載簡章</span>
-										</a>
+										{course.filePath ? (
+											<a
+												href={course.filePath}
+												download
+												className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-[#2b68b3] to-[#4a90e2] text-white rounded-lg hover:from-[#1f4d85] hover:to-[#2b68b3] transition-all duration-300 shadow-md hover:shadow-lg mt-3'>
+												<IoDownload className='text-lg' />
+												<span className='text-sm font-medium'>下載簡章</span>
+											</a>
+										) : (
+											<div className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-500 rounded-lg mt-3'>
+												<span className='text-sm'>無簡章</span>
+											</div>
+										)}
 									</div>
 
 									{/* 桌面版顯示 */}
@@ -226,15 +233,18 @@ export const ExteriorList = ({
 											: course.fee}
 									</div>
 									<div className='hidden lg:block p-3 w-28 text-center'>
-										<a
-											href={course.filePath}
-											target='_blank'
-											rel='noopener noreferrer'
-											className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-[#2b68b3] to-[#4a90e2] text-white rounded-lg hover:from-[#1f4d85] hover:to-[#2b68b3] transition-all duration-300 shadow-md hover:shadow-lg transform focus:outline-none focus:ring-2 focus:ring-[#2b68b3] focus:ring-offset-2 cursor-pointer'
-											aria-label='下載課程簡章'>
-											<IoDownload className='text-lg' />
-											<span className='text-sm font-medium'>下載</span>
-										</a>
+										{course.filePath ? (
+											<a
+												href={course.filePath}
+												download
+												className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-[#2b68b3] to-[#4a90e2] text-white rounded-lg hover:from-[#1f4d85] hover:to-[#2b68b3] transition-all duration-300 shadow-md hover:shadow-lg transform focus:outline-none focus:ring-2 focus:ring-[#2b68b3] focus:ring-offset-2 cursor-pointer'
+												aria-label='下載課程簡章'>
+												<IoDownload className='text-lg' />
+												<span className='text-sm font-medium'>下載</span>
+											</a>
+										) : (
+											<span className='text-sm text-gray-400'>無簡章</span>
+										)}
 									</div>
 								</div>
 							))
